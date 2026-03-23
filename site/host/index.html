@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Host your identity.txt</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .verify-page { max-width: 580px; margin: 0 auto; padding: 2rem 0 4rem; }
+    .verify-page h1 { font-size: 1.8rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+    .verify-page .intro { color: var(--grey); margin-bottom: 2.5rem; line-height: 1.6; }
+
+    /* Steps */
+    .step {
+      margin-bottom: 2.5rem;
+      position: relative;
+      padding-left: 2.75rem;
+    }
+    .step-number {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--code-bg);
+      border: 1px solid var(--light-grey);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--grey);
+    }
+    .step.active .step-number {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: white;
+    }
+    .step.done .step-number {
+      background: #16a34a;
+      border-color: #16a34a;
+      color: white;
+    }
+    .step h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .step p { font-size: 0.9rem; color: var(--grey); line-height: 1.5; margin-bottom: 0.75rem; }
+
+    /* Google button */
+    .btn-google {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.65rem 1.25rem;
+      background: white;
+      border: 1px solid var(--light-grey);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      color: var(--black);
+    }
+    .btn-google:hover { border-color: var(--orange); }
+    .btn-google svg { width: 18px; height: 18px; }
+
+    /* Signed in state */
+    .signed-in-as {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .signed-in-as .check { color: #16a34a; font-weight: 600; }
+    .signed-in-as .email { font-weight: 500; }
+    .signed-in-as button {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--grey);
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Form fields */
+    .field { margin-bottom: 1.25rem; }
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--grey);
+      margin-bottom: 0.4rem;
+    }
+    .field input, .field textarea {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--light-grey);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+      background: white;
+    }
+    .field input:focus, .field textarea:focus {
+      outline: none;
+      border-color: var(--orange);
+    }
+    .field input:read-only {
+      background: var(--code-bg);
+      color: var(--grey);
+    }
+    .field textarea {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      min-height: 350px;
+      resize: vertical;
+    }
+    .field .hint {
+      font-size: 0.78rem;
+      color: var(--grey);
+      margin-top: 0.3rem;
+      line-height: 1.4;
+    }
+    .field .char-count {
+      font-size: 0.75rem;
+      color: var(--grey);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .field .char-count.warn { color: var(--orange); }
+    .field .char-count.over { color: #dc2626; }
+
+    /* URL options */
+    .url-options { margin-bottom: 1rem; }
+    .url-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.9rem;
+      border: 1px solid var(--light-grey);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      font-size: 0.88rem;
+    }
+    .url-option:hover { border-color: var(--orange); }
+    .url-option.selected { border-color: var(--orange); background: rgba(255, 82, 0, 0.04); }
+    .url-option input[type="radio"] { accent-color: var(--orange); }
+    .url-option code {
+      background: var(--code-bg);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+    }
+    .url-option .desc {
+      font-size: 0.78rem;
+      color: var(--grey);
+      margin-left: auto;
+    }
+
+    /* Custom handle input */
+    .handle-edit {
+      display: flex;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+    .handle-edit span {
+      padding: 0.65rem 0.7rem;
+      background: var(--code-bg);
+      border: 1px solid var(--light-grey);
+      border-right: none;
+      border-radius: 8px 0 0 8px;
+      font-size: 0.82rem;
+      color: var(--grey);
+      white-space: nowrap;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    .handle-edit input {
+      border-radius: 0 8px 8px 0;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+    }
+
+    /* Disabled state */
+    .step-disabled { opacity: 0.4; pointer-events: none; }
+
+    /* Error / success */
+    .error-banner {
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .success-state {
+      text-align: center;
+      padding: 2rem 0;
+    }
+    .success-state .check-big {
+      width: 48px;
+      height: 48px;
+      background: #16a34a;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .success-state h2 { margin-bottom: 0.5rem; }
+    .success-state .url-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.9rem;
+      background: var(--code-bg);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem auto;
+      word-break: break-all;
+      justify-content: center;
+    }
+    .success-state .url-display a { color: var(--orange); }
+    .btn-copy {
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid var(--light-grey);
+      border-radius: 6px;
+      padding: 0.4rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--grey);
+      transition: all 0.2s;
+    }
+    .btn-copy:hover { border-color: var(--orange); color: var(--orange); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="site-title">identity<span>.txt</span></a>
+      <nav>
+        <a href="/#spec">Spec</a>
+        <a href="/#why">Why</a>
+        <a href="/#host">Host</a>
+        <a href="/#create">Create yours</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="verify-page">
+
+      <h1>Host your identity.txt</h1>
+      <p class="intro">Get a permanent URL for your identity.txt. Sign in with Google to link your file to your account. Your email is never shown publicly.</p>
+
+      <div class="error-banner" id="error-banner"></div>
+
+      <div id="form-area">
+
+        <!-- Step 1: Sign in -->
+        <div class="step active" id="step-1">
+          <span class="step-number">1</span>
+          <h2>Sign in</h2>
+          <p>We're starting with Google sign-in. Your authenticated account is how we link your identity. We don't store your password or access your account.</p>
+          <div id="signin-area">
+            <button class="btn-google" id="btn-google">
+              <svg viewBox="0 0 24 24" aria-label="Google logo" role="img"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              Sign in with Google
+            </button>
+          </div>
+          <div id="signedin-area" style="display:none;">
+            <div class="signed-in-as">
+              <span class="check">&#10003;</span>
+              <span class="email" id="user-email"></span>
+              <button onclick="doSignOut()">Sign out</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Content -->
+        <div class="step step-disabled" id="step-2">
+          <span class="step-number">2</span>
+          <h2>Your identity.txt</h2>
+          <p>Paste or write your identity.txt content. Must have an H1 heading with your name and at least one H2 section. <a href="/#spec" target="_blank" rel="noopener">See the spec</a> for guidance.</p>
+          <div class="field">
+            <textarea id="content" placeholder="# Your Name
+
+> A short summary of who you are.
+
+## Voice
+
+How you write. Tone, patterns, things you never say.
+
+## Terms
+
+prompt-only"></textarea>
+            <div class="char-count" id="char-count">0 characters</div>
+          </div>
+          <div id="name-warning" style="display:none; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 0.65rem 1rem; font-size: 0.88rem; color: #92400e;">
+            The name in your file doesn't match your Google account name. This is fine for pen names, but may reduce trust.
+          </div>
+        </div>
+
+        <!-- Step 3: URL -->
+        <div class="step step-disabled" id="step-3">
+          <span class="step-number">3</span>
+          <h2>Choose your URL</h2>
+          <p>Your identity.txt will be served as a plain text file at this URL.</p>
+
+          <div class="url-options" id="url-options">
+            <label class="url-option selected" id="opt-friendly">
+              <input type="radio" name="url-type" value="friendly" checked>
+              <code id="friendly-preview">identitytxt.org/@username</code>
+              <span class="desc">Easy to remember</span>
+            </label>
+            <label class="url-option" id="opt-private">
+              <input type="radio" name="url-type" value="private">
+              <code id="private-preview">identitytxt.org/@a7f3b2c1</code>
+              <span class="desc">Pseudonymous</span>
+            </label>
+          </div>
+
+          <div class="handle-edit" id="handle-edit">
+            <span>identitytxt.org/@</span>
+            <input type="text" id="handle" placeholder="yourname" maxlength="30">
+          </div>
+          <div class="hint" style="margin-top: 0.3rem; font-size: 0.78rem; color: var(--grey);">Lowercase, 3-30 characters. Letters, numbers, hyphens.</div>
+        </div>
+
+        <!-- Submit -->
+        <div class="step step-disabled" id="step-submit" style="padding-left: 0;">
+          <button class="btn btn-primary" id="btn-submit">Publish</button>
+        </div>
+
+      </div>
+
+      <!-- Success state -->
+      <div id="success-area" style="display:none;">
+        <div class="success-state">
+          <div class="check-big">&#10003;</div>
+          <h2>Authenticated and live</h2>
+          <p>Your identity.txt is hosted and authenticated via Google. Share this URL with AI tools, link it from your profiles, or paste it into any context window.</p>
+          <div class="url-display">
+            <a id="success-url" href="" target="_blank" rel="noopener"></a>
+            <button class="btn-copy" id="btn-copy" title="Copy URL">Copy</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <span>A <a href="https://www.fiftyfiveandfive.com" target="_blank" rel="noopener">Fifty Five and Five</a> project</span>
+      <span><a href="https://github.com/Fifty-Five-and-Five/identitytxt" target="_blank" rel="noopener">GitHub</a></span>
+      <span>Licenced under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY 4.0</a></span>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+
+    const app = initializeApp({
+      apiKey: "AIzaSyCTz30gVqWZhmMX0YZzTBWgw-cv0DTAwIU",
+      authDomain: "identitytxt.firebaseapp.com",
+      projectId: "identitytxt",
+      storageBucket: "identitytxt.firebasestorage.app",
+      messagingSenderId: "976565588211",
+      appId: "1:976565588211:web:1399ed9f8880581e166786"
+    });
+
+    const auth = getAuth(app);
+    let currentUser = null;
+    let verifiedEmail = null;
+
+    // --- Step management ---
+    function activateStep(n) {
+      for (let i = 1; i <= 3; i++) {
+        const el = document.getElementById('step-' + i);
+        el.classList.remove('active', 'done', 'step-disabled');
+        if (i < n) el.classList.add('done');
+        else if (i === n) el.classList.add('active');
+        else el.classList.add('step-disabled');
+      }
+      const submit = document.getElementById('step-submit');
+      submit.classList.toggle('step-disabled', n < 4);
+    }
+
+    function checkProgress() {
+      if (!currentUser) { activateStep(1); return; }
+      const content = document.getElementById('content').value.trim();
+      if (!content || !content.match(/^# .+/m) || !content.match(/^## .+/m)) { activateStep(2); return; }
+      checkNameMatch(content);
+      const handle = document.getElementById('handle').value.trim();
+      if (!handle || handle.length < 3) { activateStep(3); return; }
+      activateStep(4);
+    }
+
+    // --- Name mismatch warning ---
+    function checkNameMatch(content) {
+      const warning = document.getElementById('name-warning');
+      if (!currentUser) { warning.style.display = 'none'; return; }
+      const h1Match = content.match(/^# (.+)$/m);
+      if (!h1Match) { warning.style.display = 'none'; return; }
+      const h1Name = h1Match[1].trim().toLowerCase();
+      const displayName = (currentUser.displayName || '').trim().toLowerCase();
+      if (!displayName || h1Name === displayName) {
+        warning.style.display = 'none';
+      } else {
+        warning.style.display = '';
+      }
+    }
+
+    // --- Step 1: Sign in ---
+    // Check for redirect result on page load (fallback flow)
+    getRedirectResult(auth).catch(() => {});
+
+    document.getElementById('btn-google').addEventListener('click', async () => {
+      try {
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      } catch (e) {
+        if (e.code === 'auth/popup-closed-by-user') return;
+        // If popup blocked or fails, fall back to redirect
+        if (e.code === 'auth/popup-blocked' || e.code === 'auth/cancelled-popup-request') {
+          await signInWithRedirect(auth, new GoogleAuthProvider());
+          return;
+        }
+        showError(e.message);
+      }
+    });
+
+    window.doSignOut = async () => {
+      await auth.signOut();
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      document.getElementById('signin-area').style.display = user ? 'none' : '';
+      document.getElementById('signedin-area').style.display = user ? '' : 'none';
+
+      if (user) {
+        verifiedEmail = (user.email || '').toLowerCase();
+        document.getElementById('user-email').textContent = user.email;
+        generateHandles(user);
+      } else {
+        verifiedEmail = null;
+      }
+      checkProgress();
+    });
+
+    // --- Step 2: Content ---
+    const contentEl = document.getElementById('content');
+    const charCount = document.getElementById('char-count');
+    const MAX_CHARS = 15000;
+
+    contentEl.addEventListener('input', () => {
+      const len = contentEl.value.length;
+      charCount.textContent = len.toLocaleString() + ' characters';
+      charCount.className = 'char-count' + (len > MAX_CHARS ? ' over' : len > 12000 ? ' warn' : '');
+      checkProgress();
+    });
+
+    // --- Step 3: URL options ---
+    function generateHandles(user) {
+      const name = (user.displayName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const friendly = name.slice(0, 30) || 'user';
+
+      // Short hash from email
+      let hash = 0;
+      const email = (user.email || '').toLowerCase();
+      for (let i = 0; i < email.length; i++) {
+        hash = ((hash << 5) - hash + email.charCodeAt(i)) | 0;
+      }
+      const privateHandle = Math.abs(hash).toString(36).slice(0, 8);
+
+      document.getElementById('friendly-preview').textContent = 'identitytxt.org/@' + friendly;
+      document.getElementById('private-preview').textContent = 'identitytxt.org/@' + privateHandle;
+      document.getElementById('handle').value = friendly;
+
+      // Store for toggling
+      document.getElementById('opt-friendly').dataset.handle = friendly;
+      document.getElementById('opt-private').dataset.handle = privateHandle;
+    }
+
+    document.querySelectorAll('input[name="url-type"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        document.querySelectorAll('.url-option').forEach(o => o.classList.remove('selected'));
+        e.target.closest('.url-option').classList.add('selected');
+        const opt = document.getElementById('opt-' + e.target.value);
+        document.getElementById('handle').value = opt.dataset.handle || '';
+        checkProgress();
+      });
+    });
+
+    document.getElementById('handle').addEventListener('input', (e) => {
+      // Sanitise: lowercase, only allowed chars
+      e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      checkProgress();
+    });
+
+    // --- Submit ---
+    document.getElementById('btn-submit').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true;
+      btn.textContent = 'Publishing...';
+      hideError();
+
+      const handle = document.getElementById('handle').value.trim().toLowerCase();
+      const content = document.getElementById('content').value.trim();
+
+      // Client-side validation
+      if (handle.length < 3) {
+        showError('Handle is too short. It needs to be at least 3 characters.');
+        btn.disabled = false; btn.textContent = 'Publish'; return;
+      }
+      if (handle.length > 30) {
+        showError('Handle is too long. Maximum 30 characters.');
+        btn.disabled = false; btn.textContent = 'Publish'; return;
+      }
+      if (!/^[a-z0-9][a-z0-9_-]*[a-z0-9]$/.test(handle)) {
+        showError('Handle must start and end with a letter or number. Only lowercase letters, numbers, and hyphens allowed.');
+        btn.disabled = false; btn.textContent = 'Publish'; return;
+      }
+      if (!content) {
+        showError('Your identity.txt is empty. Add some content first.');
+        btn.disabled = false; btn.textContent = 'Publish'; return;
+      }
+      if (!content.match(/^# .+/m)) {
+        showError('Your file needs an H1 heading with your name. Start a line with # followed by your name.');
+        btn.disabled = false; btn.textContent = 'Publish'; return;
+      }
+      if (!content.match(/^## .+/m)) {
+        showError('Your file needs at least one H2 section (like ## Voice or ## Expertise).');
+        btn.disabled = false; btn.textContent = 'Publish'; return;
+      }
+      if (content.length > MAX_CHARS) {
+        showError('Content exceeds the ' + MAX_CHARS.toLocaleString() + ' character limit.');
+        btn.disabled = false; btn.textContent = 'Publish'; return;
+      }
+
+      try {
+        const token = await currentUser.getIdToken();
+        const res = await fetch('/api/profile', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ handle, content })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+        // Success
+        document.getElementById('form-area').style.display = 'none';
+        document.getElementById('success-area').style.display = '';
+        const url = data.url;
+        const link = document.getElementById('success-url');
+        link.href = url.replace('https://identitytxt.org', '');
+        link.textContent = url;
+      } catch (err) {
+        showError(err.message || 'Something went wrong');
+        btn.disabled = false;
+        btn.textContent = 'Publish';
+      }
+    });
+
+    // --- Helpers ---
+    function showError(msg) {
+      const el = document.getElementById('error-banner');
+      // Escape HTML to prevent reflected XSS
+      const div = document.createElement('div');
+      div.textContent = msg;
+      el.innerHTML = div.innerHTML;
+      el.style.display = '';
+    }
+
+    function hideError() {
+      document.getElementById('error-banner').style.display = 'none';
+    }
+
+    document.getElementById('btn-copy').addEventListener('click', () => {
+      const url = document.getElementById('success-url').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('btn-copy');
+        btn.textContent = 'Copied';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+  </script>
+  <script src="/assets/js/t.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>author.md - Interview</title>
+  <link rel="stylesheet" href="/create/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="logo-row">
+        <img src="/create/assets/icon.svg" alt="55&5">
+        <h2>author.md</h2>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Skill file</h3>
+        <div class="file-upload" id="skill-upload">
+          <input type="file" id="skill-file" accept=".md,.txt">
+          <div class="label">Drop <strong>skill .md</strong> or click</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Research file</h3>
+        <div class="file-upload" id="research-upload">
+          <input type="file" id="research-file" accept=".md,.txt">
+          <div class="label">Drop <strong>research .md</strong> or click</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section" id="progress-section" style="display:none;">
+        <h3>Progress</h3>
+        <div class="progress-tracker" id="progress-tracker">
+          <div class="progress-step" data-step="0"><span class="dot"></span>Intro</div>
+          <div class="progress-step" data-step="1"><span class="dot"></span>Personal Details</div>
+          <div class="progress-step" data-step="2"><span class="dot"></span>What You Do</div>
+          <div class="progress-step" data-step="3"><span class="dot"></span>Core Traits</div>
+          <div class="progress-step" data-step="4"><span class="dot"></span>Career Arc</div>
+          <div class="progress-step" data-step="5"><span class="dot"></span>Key Stories</div>
+          <div class="progress-step" data-step="6"><span class="dot"></span>Topics</div>
+          <div class="progress-step" data-step="7"><span class="dot"></span>Voice & Tone</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section" style="flex:1; min-height:0; display:flex; flex-direction:column;">
+        <h3>Transcript</h3>
+        <div class="transcript-box" id="transcript">
+          <div class="empty">Transcript will appear here during the interview</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <div class="orb-container">
+        <canvas id="orb" width="800" height="800"></canvas>
+      </div>
+      <div class="status-label" id="status">Upload a skill file and research file to begin</div>
+      <div class="controls">
+        <button class="btn btn-primary" id="btn-start" disabled>Start interview</button>
+        <button class="btn btn-ghost" id="btn-end" style="display:none">End interview</button>
+      </div>
+    </main>
+  </div>
+
+  <div class="result-overlay" id="result-overlay">
+    <div class="result-card">
+      <h2>Interview transcript</h2>
+      <pre id="result-content"></pre>
+      <div class="actions">
+        <button class="btn btn-ghost" id="btn-close-result">Close</button>
+        <button class="btn btn-primary" id="btn-download">Download transcript</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/create/js/orb.js"></script>
+  <script src="/create/js/realtime.js"></script>
+  <script src="/create/js/app.js"></script>
+</body>
+</html>

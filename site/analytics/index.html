@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics - identity.txt</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    .analytics-wrap { max-width: 960px; margin: 0 auto; padding: 0 2rem 4rem; }
+
+    /* Login */
+    .login-box { max-width: 360px; margin: 4rem auto; text-align: center; }
+    .login-box h1 { font-size: 1.4rem; margin-bottom: 1rem; letter-spacing: -0.02em; }
+    .login-box input {
+      width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--light-grey);
+      border-radius: 6px; font-size: 1rem; margin-bottom: 0.75rem;
+      background: var(--white);
+    }
+    .login-box button {
+      width: 100%; padding: 0.75rem; background: var(--orange); color: #fff;
+      border: none; border-radius: 6px; font-size: 1rem; cursor: pointer;
+      font-weight: 500;
+    }
+    .login-box button:hover { opacity: 0.9; }
+    .login-error { color: #c00; font-size: 0.85rem; margin-top: 0.5rem; }
+
+    /* Dashboard header */
+    .dash-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+    .dash-header h1 { font-size: 1.3rem; letter-spacing: -0.02em; }
+    .range-btns { display: flex; gap: 0.5rem; }
+    .range-btns button {
+      padding: 0.4rem 0.8rem; border: 1px solid var(--light-grey); border-radius: 4px;
+      background: var(--white); cursor: pointer; font-size: 0.85rem; color: var(--black);
+    }
+    .range-btns button.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+    .range-btns input[type="date"] {
+      padding: 0.35rem 0.5rem; border: 1px solid var(--light-grey); border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    /* Summary cards */
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .card {
+      background: var(--white); border: 1px solid var(--light-grey); border-radius: 8px;
+      padding: 1.25rem; text-align: center;
+    }
+    .card .label { font-size: 0.8rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+    .card .value { font-size: 1.8rem; font-weight: 600; letter-spacing: -0.02em; color: var(--black); }
+
+    /* Chart */
+    .chart-wrap {
+      background: var(--white); border: 1px solid var(--light-grey); border-radius: 8px;
+      padding: 1.5rem; margin-bottom: 2rem;
+    }
+    .chart-wrap canvas { width: 100% !important; max-height: 280px; }
+
+    /* Two-column grid */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+
+    /* Panels */
+    .panel {
+      background: var(--white); border: 1px solid var(--light-grey); border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .panel h2 { font-size: 1rem; margin-bottom: 1rem; letter-spacing: -0.01em; }
+    .panel table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .panel th { text-align: left; color: var(--grey); font-weight: 500; padding: 0.4rem 0; border-bottom: 1px solid var(--light-grey); }
+    .panel td { padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; }
+    .panel td:last-child { text-align: right; color: var(--grey); }
+    .panel .bar-cell { position: relative; }
+    .panel .bar {
+      position: absolute; left: 0; top: 2px; bottom: 2px;
+      background: var(--orange-light); border-radius: 3px;
+    }
+    .panel .bar-label { position: relative; z-index: 1; }
+
+    /* Three-column breakdown */
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+
+    /* Loading */
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--light-grey); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state { text-align: center; padding: 3rem; color: var(--grey); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .cards { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .dash-header { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 480px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+
+    /* Logout */
+    .btn-logout {
+      font-size: 0.8rem; color: var(--grey); cursor: pointer; background: none;
+      border: none; text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a href="/" class="site-title">identity<span>.txt</span></a>
+      <nav>
+        <a href="/">Home</a>
+        <button class="btn-logout" id="logout" style="display:none;">Log out</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="analytics-wrap">
+    <!-- Login -->
+    <div id="login-view" class="login-box" style="display:none;">
+      <h1>Analytics</h1>
+      <form id="login-form">
+        <input type="password" id="password-input" placeholder="Password" autocomplete="current-password" required>
+        <button type="submit">Sign in</button>
+      </form>
+      <div id="login-error" class="login-error" style="display:none;"></div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dash-view" style="display:none;">
+      <div class="dash-header">
+        <h1>identity.txt analytics</h1>
+        <div class="range-btns">
+          <button data-range="7" class="active">7d</button>
+          <button data-range="30">30d</button>
+          <button data-range="90">90d</button>
+          <input type="date" id="custom-start" title="Start date">
+          <input type="date" id="custom-end" title="End date">
+          <button id="custom-go">Go</button>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="label">Views</div><div class="value" id="stat-views">-</div></div>
+        <div class="card"><div class="label">Visitors</div><div class="value" id="stat-visitors">-</div></div>
+        <div class="card"><div class="label">Bounce rate</div><div class="value" id="stat-bounce">-</div></div>
+        <div class="card"><div class="label">Profiles created</div><div class="value" id="stat-profiles">-</div></div>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Top pages</h2>
+          <table id="table-pages"><thead><tr><th>Page</th><th>Views</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h2>Top referrers</h2>
+          <table id="table-referrers"><thead><tr><th>Referrer</th><th>Views</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Top profiles</h2>
+          <table id="table-profiles"><thead><tr><th>Profile</th><th>Views</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h2>Regions</h2>
+          <table id="table-regions"><thead><tr><th>Region</th><th>Views</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="panel">
+          <h2>Browsers</h2>
+          <table id="table-browsers"><thead><tr><th>Browser</th><th>Count</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h2>Operating systems</h2>
+          <table id="table-os"><thead><tr><th>OS</th><th>Count</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h2>Devices</h2>
+          <table id="table-devices"><thead><tr><th>Device</th><th>Count</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <span>A <a href="https://www.fiftyfiveandfive.com" target="_blank" rel="noopener">Fifty Five and Five</a> project</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var API = '/api/a';
+      var CACHE_KEY = 'analytics_cache';
+      var CACHE_TTL = 300000; // 5 minutes
+      var chart = null;
+
+      // Password management
+      function getPassword() { return sessionStorage.getItem('analytics_pw') || ''; }
+      function setPassword(pw) { sessionStorage.setItem('analytics_pw', pw); }
+      function clearPassword() { sessionStorage.removeItem('analytics_pw'); sessionStorage.removeItem(CACHE_KEY); }
+
+      // Date helpers
+      function dateStr(d) { return d.toISOString().slice(0, 10); }
+      function daysAgo(n) { var d = new Date(); d.setDate(d.getDate() - (n - 1)); return dateStr(d); }
+
+      // Cache
+      function getCachedData(key) {
+        try {
+          var raw = sessionStorage.getItem(CACHE_KEY);
+          if (!raw) return null;
+          var store = JSON.parse(raw);
+          var entry = store[key];
+          if (!entry || Date.now() > entry.expires) return null;
+          return entry.data;
+        } catch (e) { return null; }
+      }
+
+      function setCachedData(key, data) {
+        try {
+          var raw = sessionStorage.getItem(CACHE_KEY);
+          var store = raw ? JSON.parse(raw) : {};
+          store[key] = { data: data, expires: Date.now() + CACHE_TTL };
+          sessionStorage.setItem(CACHE_KEY, JSON.stringify(store));
+        } catch (e) { /* storage full, skip */ }
+      }
+
+      // API call
+      async function apiFetch(path, body) {
+        var opts = {
+          method: body ? 'POST' : 'GET',
+          headers: { 'Content-Type': 'application/json', 'x-analytics-password': getPassword() },
+        };
+        if (body) opts.body = JSON.stringify(body);
+        var res = await fetch(API + '/' + path, opts);
+        if (res.status === 401) { clearPassword(); showLogin(); throw new Error('Unauthorised'); }
+        if (!res.ok) throw new Error('API error: ' + res.status);
+        return res.json();
+      }
+
+      // Views
+      function showLogin() {
+        document.getElementById('login-view').style.display = '';
+        document.getElementById('dash-view').style.display = 'none';
+        document.getElementById('logout').style.display = 'none';
+      }
+
+      function showDashboard() {
+        document.getElementById('login-view').style.display = 'none';
+        document.getElementById('dash-view').style.display = '';
+        document.getElementById('logout').style.display = '';
+      }
+
+      // Login form
+      document.getElementById('login-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var pw = document.getElementById('password-input').value;
+        setPassword(pw);
+        document.getElementById('login-error').style.display = 'none';
+        try {
+          await loadData(daysAgo(7), dateStr(new Date()));
+          showDashboard();
+        } catch (err) {
+          document.getElementById('login-error').textContent = 'Invalid password';
+          document.getElementById('login-error').style.display = '';
+        }
+      });
+
+      // Logout
+      document.getElementById('logout').addEventListener('click', function () {
+        clearPassword();
+        showLogin();
+      });
+
+      // Range buttons
+      var currentRange = 7;
+      document.querySelectorAll('.range-btns button[data-range]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var days = parseInt(this.getAttribute('data-range'));
+          currentRange = days;
+          document.querySelectorAll('.range-btns button[data-range]').forEach(function (b) { b.classList.remove('active'); });
+          this.classList.add('active');
+          loadData(daysAgo(days), dateStr(new Date()));
+        });
+      });
+
+      // Custom date range
+      document.getElementById('custom-go').addEventListener('click', function () {
+        var s = document.getElementById('custom-start').value;
+        var e = document.getElementById('custom-end').value;
+        if (s && e) {
+          document.querySelectorAll('.range-btns button[data-range]').forEach(function (b) { b.classList.remove('active'); });
+          loadData(s, e);
+        }
+      });
+
+      // Format numbers
+      function fmt(n) {
+        if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+        return String(n);
+      }
+
+      // Populate table
+      function fillTable(id, rows, total) {
+        var tbody = document.querySelector('#' + id + ' tbody');
+        tbody.innerHTML = '';
+        if (!rows || rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="2" style="color:var(--grey);text-align:center;padding:1rem;">No data</td></tr>';
+          return;
+        }
+        var max = rows[0].count;
+        rows.forEach(function (row) {
+          var pct = max > 0 ? Math.round((row.count / max) * 100) : 0;
+          var tr = document.createElement('tr');
+          tr.innerHTML = '<td class="bar-cell"><span class="bar" style="width:' + pct + '%"></span><span class="bar-label">' + escapeHtml(row.name) + '</span></td><td>' + fmt(row.count) + '</td>';
+          tbody.appendChild(tr);
+        });
+      }
+
+      function escapeHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      // Chart.js loader
+      var chartLoaded = false;
+      function loadChartJS() {
+        return new Promise(function (resolve, reject) {
+          if (chartLoaded) { resolve(); return; }
+          var s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+          s.onload = function () { chartLoaded = true; resolve(); };
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+
+      function renderChart(timeseries) {
+        var ctx = document.getElementById('chart').getContext('2d');
+        if (chart) chart.destroy();
+
+        var labels = timeseries.map(function (d) { return d.date.slice(5); }); // MM-DD
+        var views = timeseries.map(function (d) { return d.views; });
+        var visits = timeseries.map(function (d) { return d.visits; });
+
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Views',
+                data: views,
+                borderColor: '#FF5200',
+                backgroundColor: 'rgba(255, 82, 0, 0.05)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 2,
+                borderWidth: 2,
+              },
+              {
+                label: 'Visitors',
+                data: visits,
+                borderColor: '#999',
+                borderDash: [5, 3],
+                fill: false,
+                tension: 0.3,
+                pointRadius: 2,
+                borderWidth: 1.5,
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+              y: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 } } },
+            }
+          }
+        });
+      }
+
+      // Main data loader
+      async function loadData(start, end) {
+        var cacheKey = start + ':' + end;
+        var cached = getCachedData(cacheKey);
+
+        var data;
+        if (cached) {
+          data = cached;
+        } else {
+          data = await apiFetch('batch', {
+            endpoints: ['summary', 'timeseries', 'pages', 'referrers', 'profiles', 'browsers', 'os', 'devices', 'regions'],
+            start: start,
+            end: end,
+          });
+          setCachedData(cacheKey, data);
+        }
+
+        // Summary cards
+        if (data.summary) {
+          document.getElementById('stat-views').textContent = fmt(data.summary.views);
+          document.getElementById('stat-visitors').textContent = fmt(data.summary.visitors);
+          document.getElementById('stat-bounce').textContent = data.summary.bounceRate + '%';
+          document.getElementById('stat-profiles').textContent = fmt(data.summary.profilesCreated);
+        }
+
+        // Chart
+        if (data.timeseries) {
+          await loadChartJS();
+          renderChart(data.timeseries);
+        }
+
+        // Tables
+        fillTable('table-pages', data.pages);
+        fillTable('table-referrers', data.referrers);
+        fillTable('table-profiles', data.profiles);
+        fillTable('table-regions', data.regions);
+        fillTable('table-browsers', data.browsers);
+        fillTable('table-os', data.os);
+        fillTable('table-devices', data.devices);
+      }
+
+      // Init: check if already authenticated
+      if (getPassword()) {
+        showDashboard();
+        loadData(daysAgo(7), dateStr(new Date())).catch(function () { showLogin(); });
+      } else {
+        showLogin();
+      }
+    })();
+  </script>
+</body>
+</html>

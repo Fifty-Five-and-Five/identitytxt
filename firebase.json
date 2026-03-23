@@ -1,0 +1,40 @@
+{
+  "hosting": {
+    "public": "site",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "/api/t",
+        "function": "track"
+      },
+      {
+        "source": "/api/a/**",
+        "function": "analyticsApi"
+      },
+      {
+        "source": "/create/api/**",
+        "function": "authorApp"
+      },
+      {
+        "source": "/@*",
+        "function": "registry"
+      },
+      {
+        "source": "/@*/**",
+        "function": "registry"
+      },
+      {
+        "source": "/api/**",
+        "function": "api"
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

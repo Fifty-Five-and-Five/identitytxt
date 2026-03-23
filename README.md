@@ -18,9 +18,23 @@ This specification is licenced under [Creative Commons Attribution 4.0 Internati
 
 You're free to share and adapt the spec for any purpose, with attribution.
 
+## author.md voice interview
+
+This repo also contains the author.md voice interview tool, a real-time audio interview powered by OpenAI's Realtime API that generates identity.txt profiles. Hosted at [identitytxt.org/create/](https://identitytxt.org/create/) behind a password.
+
+## Structure
+
+- `site/` - identitytxt.org static site (Firebase Hosting)
+- `site/create/` - author.md voice interview frontend
+- `functions/` - Firebase Cloud Functions (registry, API, analytics, author.md backend)
+- `public/` - original author.md standalone frontend (development)
+- `ai-writing-style/` - profile generation logic
+- `examples/` - sample outputs
+
 ## Links
 
 - [identitytxt.org](https://identitytxt.org) - project site
 - [Host your identity.txt](https://identitytxt.org/host/) - free hosted option
+- [Create with voice interview](https://identitytxt.org/create/) - author.md tool
 
 A [Fifty Five and Five](https://www.fiftyfiveandfive.com) project.

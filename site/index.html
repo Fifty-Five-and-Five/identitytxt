@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>identity.txt - A portable identity file for AI</title>
+  <meta name="description" content="A portable identity file that tells AI tools who you are, how you think, and on what terms. llms.txt for people.">
+  <meta property="og:title" content="identity.txt">
+  <meta property="og:description" content="A portable identity file that tells AI tools who you are, how you think, and on what terms.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://identitytxt.org">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="identity.txt">
+  <meta name="twitter:description" content="A portable identity file that tells AI tools who you are, how you think, and on what terms.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a href="/" class="site-title">identity<span>.txt</span></a>
+      <nav>
+        <a href="#spec">Spec</a>
+        <a href="#why">Why</a>
+        <a href="#host">Host</a>
+        <a href="#create">Create yours</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>identity<span>.txt</span></h1>
+      <p class="subtitle">A portable identity file that tells AI tools who you are, how you think, and on what terms.</p>
+      <span class="tagline">llms.txt tells AI about websites. identity.txt tells AI about people.</span>
+    </div>
+
+    <!-- Spec -->
+    <section id="spec">
+      <h2>The spec</h2>
+
+      <p>An identity.txt file is a markdown file. It follows the same philosophy as <a href="https://llmstxt.org" target="_blank" rel="noopener">llms.txt</a>: convention over specification, structured enough for AI tools to parse, flexible enough that anyone can write one.</p>
+
+      <h3>What's required</h3>
+
+      <ol>
+        <li>An <strong>H1 heading</strong> with your name</li>
+        <li><strong>At least one H2 section</strong></li>
+      </ol>
+
+      <p>Everything else is optional but recognised. Include what matters to you.</p>
+
+      <h3>Format</h3>
+
+      <p>The H1 heading is your name. An optional blockquote after it provides a one-line summary. The rest of the file is H2 sections in any order.</p>
+
+<pre># Your Name
+
+> A short summary of who you are and what you do.
+
+## Voice
+
+How you write. Tone, patterns, phrases you use, things you never say.
+
+## Expertise
+
+What you know. Topics, domains, depth.
+
+## Background
+
+Your story. Career arc, key moments, what shaped you.
+
+## Preferences
+
+Hard rules. Formatting conventions. Things to always or never do.
+
+## References
+
+Links to representative writing. Blog posts, articles, talks.
+
+## Terms
+
+How AI tools may use this file.
+
+## Verification
+
+Links to verified profiles that reference this file.</pre>
+
+      <h3>Recognised sections</h3>
+
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Section</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>## Voice</code></td>
+            <td>How you write. Tone, patterns, characteristic phrases, anti-patterns. The section that makes identity.txt worth having.</td>
+          </tr>
+          <tr>
+            <td><code>## Expertise</code></td>
+            <td>What you know. Topics you can speak to with authority, domains you work in, depth of knowledge.</td>
+          </tr>
+          <tr>
+            <td><code>## Background</code></td>
+            <td>Your story. Career arc, key moments, what shaped how you think.</td>
+          </tr>
+          <tr>
+            <td><code>## Preferences</code></td>
+            <td>Hard rules for AI interactions. Spelling conventions, formatting rules, things to always or never do.</td>
+          </tr>
+          <tr>
+            <td><code>## References</code></td>
+            <td>Links to representative work. Blog posts, articles, talks, code. Shows rather than tells.</td>
+          </tr>
+          <tr>
+            <td><code>## Terms</code></td>
+            <td>How AI tools may use this file. A machine-readable consent signal.</td>
+          </tr>
+          <tr>
+            <td><code>## Verification</code></td>
+            <td>Links to verified profiles that reference this file. Bidirectional trust.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Custom H2 sections are fine. The spec recognises certain headings so AI tools can parse them consistently, but it doesn't reject others. A developer might add <code>## Stack</code>. A designer might add <code>## Process</code>. Both are valid.</p>
+
+      <h3>Terms values</h3>
+
+      <p>The Terms section is a machine-readable consent signal, like <code>robots.txt</code>. It's a social contract, not a legal one. Consent and permission are slightly different concerns to identity, but we think there are useful overlaps here that the community might flesh out over time. The first line of the section should be one of these values:</p>
+
+      <div class="terms-grid">
+        <div class="term-card">
+          <div class="term-name">open</div>
+          <div class="term-desc">Any AI tool, any purpose. The most permissive option.</div>
+        </div>
+        <div class="term-card">
+          <div class="term-name">attribution</div>
+          <div class="term-desc">Use permitted with attribution to the author.</div>
+        </div>
+        <div class="term-card">
+          <div class="term-name">prompt-only</div>
+          <div class="term-desc">Context in prompts and conversations. Not for training or fine-tuning.</div>
+        </div>
+        <div class="term-card">
+          <div class="term-name">restricted</div>
+          <div class="term-desc">Specific permissions listed below the value. Read them.</div>
+        </div>
+        <div class="term-card">
+          <div class="term-name">none</div>
+          <div class="term-desc">Opt-out signal. Do not use this file. Respect it.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Host -->
+    <section id="host">
+      <h2>Host your identity</h2>
+
+      <p>identity.txt works best when it is portable. Host it yourself and share with your favourite AI tool. No more locked in "custom instructions". We are also experimenting with hosting your identity for you. We do ask you to login. Right now you can authenticate with a Google login, with other providers coming soon. This lets us tie your file to an email address at a basic level (never shared in the file itself). We think verification of identity is an interesting topic, but it's complex with much that has come before us. We haven't solved it, but we are interested in the conversation.</p>
+
+      <p>We can see a world where identity.txt doesn't just say who you are but offers some kind of verification. Verification is a spectrum, not binary. Not every identity.txt needs the same, or any, level of trust. A file you paste into Claude for better code reviews doesn't need verification. A file you share publicly might. Or verification might not be a good use case at all.</p>
+
+      <p>We see three paths right now:</p>
+
+      <ul>
+        <li><strong>Self-hosted:</strong> Host the file at <code>yourdomain.com/identity.txt</code>. You control the domain, you control the file. Add a <code>canonical:</code> field pointing to itself. Same trust model as llms.txt.</li>
+        <li><strong>Cross-referencing:</strong> List your profiles in the file. Link back from those profiles. If your LinkedIn bio links to your identity.txt, that's a trust signal. Multiple cross-references, higher confidence.</li>
+        <li><strong>Hosted on identitytxt.org:</strong> Sign in with Google and your identity.txt goes live at a permanent URL. We know which Google account uploaded it, which is a start, but we're honest that this is a long way from true identity verification. It's a first step.</li>
+      </ul>
+
+      <p>For files hosted with us, we also note whether the name in your file matches your authenticated account name. A match is a slightly stronger trust signal; a mismatch (pen names, for example) is fine and isn't blocked.</p>
+
+      <p>Local, unhosted identity.txt files are still useful. Paste one into any AI tool and it works immediately. Hosting just makes it linkable, shareable, and a bit more trustworthy.</p>
+
+      <p style="margin-top: 1.5rem;"><a href="/host/" class="btn btn-primary">Host your identity.txt</a> <a href="/create/" class="btn btn-secondary" style="margin-left: 0.5rem;">Create with voice interview</a></p>
+    </section>
+
+    <!-- Why -->
+    <section id="why">
+      <h2>Why identity.txt</h2>
+
+      <p>AI tools are genuinely better when they understand how you write, what you know, and how you think. But there's no standard way to give them that context. Custom instructions are platform-locked, static, and siloed. You rewrite them for every tool and they go stale the moment you change. LinkedIn is a CV for humans. Your "about me" page is marketing copy, not structured data.</p>
+
+      <p>identity.txt is the answer: a single portable file that captures who you are, how you write, what you know, and on what terms AI tools can use that information. Write it once, use it everywhere.</p>
+
+      <div class="pull-quote">Increasingly, the better AI knows you, the better your interactions. identity.txt gives you a portable version of yourself that you control, and can share with others.</div>
+
+      <p>In March 2026, Grammarly got us thinking about this problem, both the idea of identity and elements of verification. They shipped a feature called "Expert Review" that presented AI editing advice under real people's names. Stephen King. Kara Swisher. Julia Angwin. <a href="https://www.theverge.com/ai-artificial-intelligence/893270/grammarly-ai-expert-review-disabled" target="_blank" rel="noopener">None of them consented</a>. The feature lasted about a week before the class action and the shutdown.</p>
+
+      <p>The need was real. The method was indefensible. You can't take someone's identity. They have to give it to you.</p>
+
+      <p>Sharing an identity file with an AI tool you're not directly using is a newer idea, and might not take off. But we think there's something here and we're interested to see how it develops.</p>
+
+      <h3>Consent, not protection</h3>
+
+      <p>This is not a defensive move. It's the same approach as Creative Commons: not "all rights reserved" but "here are the specific rights I'm granting." The Terms section is a machine-readable consent signal. Companies that ignore it risk being the next Grammarly.</p>
+    </section>
+
+
+    <!-- Create -->
+    <section id="create" class="cta">
+      <h2>Create yours</h2>
+      <p>Write an identity.txt file and host it on your domain. It's just markdown. Start with your name, add a Voice section, add Terms. You can write one in five minutes.</p>
+      <p>Or <a href="/host/" class="cta-link">host it with us</a>.</p>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      <span>A <a href="https://www.fiftyfiveandfive.com" target="_blank" rel="noopener">Fifty Five and Five</a> project</span>
+      <span><a href="https://github.com/Fifty-Five-and-Five/identitytxt" target="_blank" rel="noopener">GitHub</a></span>
+      <span>Licenced under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY 4.0</a></span>
+    </div>
+  </footer>
+
+  <script src="/assets/js/t.js" defer></script>
+</body>
+</html>

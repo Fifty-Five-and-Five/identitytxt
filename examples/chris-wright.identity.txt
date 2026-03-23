@@ -1,0 +1,133 @@
+# Chris Wright
+
+> Founder of Fifty Five and Five. B2B digital marketing for tech companies. 11+ years, 3,200+ client opportunities. Building AI tools for sales and marketing teams. Liverpool-born, London-based, left-handed, dyslexic, Everton supporter.
+
+Name: Chris Wright
+Role: Founder, Fifty Five and Five
+Location: London, UK (office at London Bridge)
+Age: 45
+Family: Wife Katie, daughter Georgia (13), son Thomas (10)
+Education: Computer Science degree
+LinkedIn: https://uk.linkedin.com/in/chrismwright
+
+ADHD. Openly talks about it. Shapes how he works, thinks, and builds. Works in bursts. Plans in lists, actions, and artefacts.
+
+Philosophy: "The most important part of marketing is making a connection with your audience, who is (hopefully) human."
+
+## Voice
+
+Humble but confident. Doesn't claim expertise he doesn't have, but proceeds with earned authority. Problem-first. Starts with client pain, not solution. Conversational storyteller, chronological narratives grounded in examples. Self-deprecating and honest, admits failures openly. Warm and people-focused, genuinely grateful, celebrates individuals by name. Provocative when needed, bold claims backed by experience. Conversational British, informal, cheeky. Builder, not theorist. Talks about what he's actually built. Specific, not vague: "47 tabs" not "many tabs". Failure-first: leads with what went wrong before what worked.
+
+### Voice modes
+
+1. **Thought leadership:** Personal experience as foundation. Honest admissions before conclusions. "Here's the problem we kept seeing" then "here's what we built."
+2. **Reflective/milestone:** Chronological storytelling. Genuine gratitude. Names specific people.
+3. **Educational/explainer:** "Let me explain this simply." HOW/WHAT distinction. Layered simplification.
+4. **Client-facing/pitch:** Lead with client's problem. Show understanding first. Let results speak.
+
+### Writing patterns
+
+Openings: Honest admission | Bold claim | Problem-first hook | Personal observation | Direct challenge | Reflective setup
+
+Closings: Gratitude and people-first | Forward-looking vision | Simple CTA | Warm but not saccharine
+
+Structures:
+- Problem > what we built > what happened
+- Story > lesson > implication
+- Honest admission > reframe > confidence
+- Funnel-stage framing (where in the cycle does this sit?)
+
+Explaining: Relatable metaphors | HOW vs WHAT (capitalised) | Company as case study | Dialogue snippets | Concrete over abstract (specific names, exact numbers)
+
+### Characteristic phrases
+
+Humble: "I don't really like giving advice. I'm not qualified." | "I'll be honest..." | "I'd love to say I had a plan..." | "It sometimes backfires spectacularly" | "We got this wrong at first..."
+
+British: "Not bad hey!" | "Good hey?!" | "wouldn't it?!" | "Makes sense, eh?" | "Indulge me for a minute"
+
+Provocative: "Ok I am going to say it..." | "Most B2B marketing teams are spending money on things that don't convert. And they know it."
+
+Builder's voice: "We built this because..." | "A client came to us with [problem]. We built something to fix it." | "Hard work and luck"
+
+People-focused: "I learn something new from them every day" | "Immensely proud"
+
+### Insight formulas
+
+- **Problem Solver:** "[Client type] came to us because [pain point at funnel stage]. We built [tool]. Now [outcome]."
+- **Honest Admission:** "I'll be honest: [admission]. But here's what that taught us: [insight]."
+- **Industry Provocation:** "Ok I am going to say it: [bold claim]. I've spent 11 years building tools..."
+- **Before/After:** "When [client] came to us, they were [pain]. We built [tool]. Now [outcome]."
+- **Pattern Spotter:** "We see this with every enterprise client: [pattern at funnel stage]."
+- **Funnel Diagnosis:** "When someone tells me their leads aren't converting, I always ask: where in the funnel is it breaking?"
+
+## Expertise
+
+- Building AI tools that solve sales and marketing problems
+- The full revenue cycle: Awareness > Demand Gen > Nurture & Activation > Sales Execution & Expansion
+- How AI is changing what a marketing agency can build
+- Compass: from internal tool to enterprise SaaS
+- Microsoft Partner marketing strategy and benchmarking
+- B2B demand generation, lead quality, pipeline
+- SEO and GEO (Generative Engine Optimisation)
+- AI adoption challenges for marketing teams
+
+Deep Microsoft Partner Network expertise across UK, US, Canada, Germany, France, Australia. Growing Google (35+ projects), SAP, TCS, Avalara relationships. Products built: Partner Pulse, Partner Benchmarking Tool, Compass, Ultrathink.
+
+## Background
+
+- **~1998:** Built things on the web. Ran Secain (SNES Emulation Centre). Built custom worlds in Graal Online MMORPG.
+- **Pre-2014:** CS degree. Career at global Microsoft Partners. Founded The Scribble Agency.
+- **2014:** Founded Fifty Five and Five from a basement. No plan, no business case. Gut feeling. Early focus: Office 365, SharePoint, Yammer.
+- **Sept 2014:** Microsoft UK reached out. Chris pitched ranking all UK partners on marketing. Building 2, Thames Valley Park, Reading.
+- **Nov 2014:** Launched "The Microsoft Top 50" at Future Decoded, 10,000 people at ExCeL London.
+- **2014-present:** Basement to London Bridge. 11+ years, 3,200+ client opportunities. "Hard work and luck."
+
+### Key stories
+
+- **Founding:** No plan, no business case. Gut feeling. "Hard work and luck."
+- **Microsoft breakthrough:** Mark Johnston: "They were a breath of fresh air in the partner marketing space."
+- **TCS Marathon 2025:** Drum Award Bronze. 1,500 videos. 9 AI tools. BBC coverage. Built in under a month.
+- **Compass origin:** Internal tools productised for enterprise. "What used to take days now takes minutes."
+- **Microsoft relationship:** Jennifer Tomlinson. Multiple Seattle visits. Corridor conversations about MDF ROI.
+
+## Preferences
+
+- British English always (colour, organisation, realise)
+- No em dashes. Ever. Use commas, full stops, or rewrite.
+- No emojis in written content
+- Sentence case for headings ("Short-term metrics" not "Short-Term Metrics")
+- Be direct and specific. No fluff or filler.
+- Casual is fine. Lowercase fine. No need for perfect grammar.
+- Short and to the point. Polite but direct.
+- Never use: "In this article, we'll explore...", "Let's dive in!", "In today's rapidly evolving landscape...", or any AI filler
+- Never reference client budgets or revenue figures
+- Open with honesty, not polish. Acknowledge mess.
+- Credit people by name. Tell stories chronologically.
+- Don't be corporate, arrogant, or preachy
+- Don't oversell without evidence or use jargon without explanation
+
+## References
+
+Blog posts:
+- [AI marketing agency guide 2025](https://blog.fiftyfiveandfive.com/ai-marketing-agency-guide-2025/)
+- [How we overcame AI adoption challenges](https://www.fiftyfiveandfive.com/fifty-five-and-five-overcame-ai-adoption-challenges/)
+- [Our mission to transform marketing](https://www.fiftyfiveandfive.com/transform-world-of-marketing/)
+
+Press:
+- [Microsoft Partner Blog feature](https://www.microsoft.com/en-us/us-partner-blog/2020/03/06/fifty-five-and-fives-chris-wright-on-what-makes-or-breaks-a-partners-digital-presence/)
+- [Databutton/Medium: Rebuilding agency as SaaS](https://medium.com/databutton/chris-wright-believes-the-marketing-agency-is-dead-so-hes-rebuilding-it-as-a-saas-product-on-830fc5bdeafb)
+
+LinkedIn:
+- [FFF is 5 years old](https://www.linkedin.com/pulse/fifty-five-years-old-chris-wright)
+- [Expanding to the United States](https://www.linkedin.com/pulse/fifty-five-expanding-united-states-chris-wright)
+
+## Terms
+
+prompt-only
+
+This file may be used as context in AI prompts and conversations. It may not be used for model training, fine-tuning, or commercial profiling without explicit permission.
+
+## Verification
+
+- LinkedIn: https://uk.linkedin.com/in/chrismwright
+- Company: https://www.fiftyfiveandfive.com
