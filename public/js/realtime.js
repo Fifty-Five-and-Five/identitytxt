@@ -59,6 +59,7 @@ class RealtimeSession {
             instructions: systemPrompt,
             voice: 'coral',
             input_audio_transcription: { model: 'gpt-4o-mini-transcribe', language: 'en' },
+            output_audio_transcription: { model: 'gpt-4o-mini-transcribe', language: 'en' },
             turn_detection: {
               type: 'server_vad',
               threshold: 0.7,
