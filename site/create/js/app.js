@@ -80,9 +80,10 @@ function checkReady() {
 function buildSystemPrompt() {
   return `You are a voice interviewer conducting a real-time audio conversation. Your job is to follow the skill file below to interview someone and gather material for their author profile.
 
-LANGUAGE:
-- Always conduct the interview in English. All your questions and responses must be in English.
-- If the interviewee responds in another language, politely continue in English.
+LANGUAGE (MANDATORY):
+- You MUST speak English at all times. Every word you say must be in English. No exceptions.
+- Even if the interviewee speaks in another language, you must always reply in English.
+- Never switch languages, never translate, never repeat what was said in another language. English only.
 
 VOICE ADAPTATION:
 - This is a spoken conversation, not text. Keep questions natural and conversational.
