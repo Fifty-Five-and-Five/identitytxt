@@ -17,7 +17,7 @@ const authorSessionSecret = defineSecret('AUTHOR_SESSION_SECRET');
 exports.track = onRequest(trackHandler(db));
 exports.analyticsApi = onRequest({ secrets: [analyticsPassword] }, dashboardHandler(db));
 
-// --- author.md voice interview tool (password-protected) ---
+// --- identity.txt voice interview tool (password-protected) ---
 
 // Parse __session cookie (the only cookie Firebase Hosting forwards)
 function parseSessionCookie(req) {
