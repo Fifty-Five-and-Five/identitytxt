@@ -32,6 +32,10 @@
 
       <div class="sidebar-section" id="progress-section" style="display:none;">
         <h3>Progress</h3>
+        <div class="timer-display" id="timer-display">
+          <span class="timer-icon">&#9201;</span>
+          <span id="timer-text">60:00 remaining</span>
+        </div>
         <div class="progress-tracker" id="progress-tracker">
           <div class="progress-step" data-step="0"><span class="dot"></span>Intro</div>
           <div class="progress-step" data-step="1"><span class="dot"></span>Personal Details</div>
@@ -53,6 +57,14 @@
     </aside>
 
     <main class="main-area">
+      <div class="info-box" id="info-box">
+        <h3>Before you start</h3>
+        <ol>
+          <li>The interview has a <strong>60-minute time limit</strong>. You'll see a countdown timer once it begins, and the interviewer will wrap things up automatically as you approach the limit.</li>
+          <li>If the interviewer starts repeating questions or revisiting topics you've already covered, don't worry — just hit <strong>End interview</strong> and download your transcript. We can fill in any gaps from there.</li>
+          <li>The more detail you share, the better your AI-generated content will be. Don't hold back — <strong>stories, examples, and opinions</strong> all make a difference.</li>
+        </ol>
+      </div>
       <div class="orb-container">
         <canvas id="orb" width="800" height="800"></canvas>
       </div>

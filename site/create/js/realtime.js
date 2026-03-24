@@ -140,6 +140,18 @@ class RealtimeSession {
     }
   }
 
+  // Inject a guidance note into the conversation to steer the AI
+  injectGuidance(text) {
+    this.send({
+      type: 'conversation.item.create',
+      item: {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: `[SYSTEM NOTE — not spoken by the interviewee, this is an internal instruction]: ${text}` }],
+      },
+    });
+  }
+
   disconnect() {
     if (this.levelInterval) clearInterval(this.levelInterval);
     if (this.dc) this.dc.close();
