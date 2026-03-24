@@ -6,7 +6,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 6767;
 const PASSWORD = process.env.APP_PASSWORD || 'Pass@word1!';
-const SESSION_SECRET = process.env.SESSION_SECRET || 'author-md-fixed-session-key';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'identity-txt-fixed-session-key';
 
 // Read OpenAI key - env var first, then local file
 let OPENAI_KEY = process.env.OPENAI_API_KEY;
@@ -81,5 +81,5 @@ app.get('/app.html', requireAuth, (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`author.md demo running at http://localhost:${PORT}`);
+  console.log(`identity.txt demo running at http://localhost:${PORT}`);
 });

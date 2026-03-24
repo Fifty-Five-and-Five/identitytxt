@@ -78,7 +78,7 @@ function checkReady() {
 
 // Build system prompt
 function buildSystemPrompt() {
-  return `You are a voice interviewer conducting a real-time audio conversation. Your job is to follow the skill file below to interview someone and gather material for their author profile.
+  return `You are a voice interviewer conducting a real-time audio conversation. Your job is to follow the skill file below to interview someone and gather material for their identity.txt profile.
 
 LANGUAGE (MANDATORY):
 - You MUST speak English at all times. Every word you say must be in English. No exceptions.
