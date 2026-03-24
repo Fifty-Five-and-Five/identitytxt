@@ -52,11 +52,12 @@ class RealtimeSession {
       // Data channel for events
       this.dc = this.pc.createDataChannel('oai-events');
       this.dc.onopen = () => {
-        // Configure session
+        // Configure session — must be acknowledged before we ask AI to speak
         this.send({
           type: 'session.update',
           session: {
             instructions: systemPrompt,
+            voice: 'coral',
             input_audio_transcription: { model: 'gpt-4o-mini-transcribe', language: 'en' },
             output_audio_transcription: { model: 'gpt-4o-mini-transcribe', language: 'en' },
             turn_detection: {
@@ -67,9 +68,7 @@ class RealtimeSession {
             },
           },
         });
-        // Prompt the AI to speak first — greet the interviewee
-        this.send({ type: 'response.create' });
-        this.onStateChange('speaking');
+        // response.create is sent after session.updated event (see handleEvent)
       };
 
       this.dc.onmessage = (e) => {
@@ -108,6 +107,12 @@ class RealtimeSession {
 
   handleEvent(event) {
     switch (event.type) {
+      case 'session.updated':
+        // Instructions are now applied — safe to ask the AI to speak
+        this.send({ type: 'response.create' });
+        this.onStateChange('speaking');
+        break;
+
       case 'conversation.item.input_audio_transcription.completed':
         if (event.transcript?.trim()) {
           this.onTranscript('user', event.transcript.trim());
