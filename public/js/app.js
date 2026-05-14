@@ -1,5 +1,9 @@
 const orb = new Orb(document.getElementById('orb'));
 
+// API path prefix - same file is served from /public/ (prefix '') and /site/create/ (prefix '/create').
+// Compute from the current URL so we hit the right endpoints in both environments.
+const API_PREFIX = location.pathname.startsWith('/create/') ? '/create' : '';
+
 // DOM refs
 const btnStart = document.getElementById('btn-start');
 const btnEnd = document.getElementById('btn-end');
@@ -20,12 +24,44 @@ const progressSteps = document.querySelectorAll('.progress-step');
 const timerDisplay = document.getElementById('timer-display');
 const timerText = document.getElementById('timer-text');
 
+// Research-panel refs
+const researchFormPanel = document.getElementById('research-form-panel');
+const researchProgressPanel = document.getElementById('research-progress-panel');
+const researchConfirmPanel = document.getElementById('research-confirm-panel');
+const rfName = document.getElementById('rf-name');
+const rfTitle = document.getElementById('rf-title');
+const rfCompany = document.getElementById('rf-company');
+const rfCompanyUrl = document.getElementById('rf-company-url');
+const rfLinkedin = document.getElementById('rf-linkedin');
+const btnGenerate = document.getElementById('btn-generate');
+const rfError = document.getElementById('rf-error');
+const phasePills = document.querySelectorAll('.phase-pill');
+const researchNow = document.getElementById('research-now');
+const searchLogWrap = document.getElementById('search-log-wrap');
+const searchLogEl = document.getElementById('search-log');
+const searchLogSummary = document.getElementById('search-log-summary');
+const researchPreview = document.getElementById('research-preview');
+const researchElapsed = document.getElementById('research-elapsed');
+const researchConfirmPreview = document.getElementById('research-confirm-preview');
+const researchEdit = document.getElementById('research-edit');
+const btnToggleEdit = document.getElementById('btn-toggle-edit');
+const btnRegenerate = document.getElementById('btn-regenerate');
+const btnUseResearch = document.getElementById('btn-use-research');
+
 let session = null;
 let skillFileContent = '';
 let researchFileContent = '';
 let transcript = [];
 let transcriptText = '';
 let aiTurnCount = 0;
+
+// Research-stream state
+let researchAbortController = null;
+let researchStartedAt = null;
+let researchElapsedTimer = null;
+let researchSearchCount = 0;
+let researchMarkdown = '';
+let researchEditing = false;
 
 // Timer state
 const SESSION_LIMIT_MS = 60 * 60 * 1000; // 60 minutes
@@ -44,7 +80,7 @@ const sectionThresholds = [1, 3, 7, 10, 15, 19, 25, 28];
 let lastReminderAtTurn = 0;
 const REMINDER_INTERVAL = 6; // send progress reminder every 6 AI turns
 
-// Skill file upload
+// Advanced-mode skill upload (overrides the baked-in skill from /api/token)
 skillFileInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -54,25 +90,275 @@ skillFileInput.addEventListener('change', async (e) => {
   checkReady();
 });
 
-// Research file upload (required)
+// Advanced-mode research upload - mark autoMode off and populate the buffer
 researchFileInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   researchFileContent = await file.text();
   researchUploadEl.classList.add('has-file');
   researchUploadEl.querySelector('.label').innerHTML = `<strong>${file.name}</strong> loaded`;
+  // Hide the research form panels since they're no longer relevant
+  researchFormPanel.style.display = 'none';
+  researchProgressPanel.style.display = 'none';
+  researchConfirmPanel.style.display = 'none';
   checkReady();
 });
 
+// Readiness: we only need research to start. The skill comes from /api/token by
+// default, or from an Advanced upload if the user provided one.
 function checkReady() {
-  const ready = skillFileContent && researchFileContent;
+  const ready = !!researchFileContent;
   btnStart.disabled = !ready;
   if (ready) {
-    statusEl.textContent = 'Ready — skill and research loaded';
-  } else if (skillFileContent) {
-    statusEl.textContent = 'Now upload the research file';
-  } else if (researchFileContent) {
-    statusEl.textContent = 'Now upload the skill file';
+    statusEl.textContent = 'Ready - click Start interview';
+  }
+}
+
+// ---- Research form -------------------------------------------------------
+
+const researchFormInputs = [rfName, rfTitle, rfCompany, rfCompanyUrl, rfLinkedin];
+researchFormInputs.forEach(input => {
+  input.addEventListener('input', updateGenerateEnabled);
+});
+
+function updateGenerateEnabled() {
+  const filled = rfName.value.trim() && rfCompany.value.trim() && rfLinkedin.value.trim();
+  btnGenerate.disabled = !filled;
+}
+
+function showRfError(msg) {
+  if (!msg) {
+    rfError.style.display = 'none';
+    rfError.textContent = '';
+    return;
+  }
+  rfError.style.display = '';
+  rfError.textContent = msg;
+}
+
+btnGenerate.addEventListener('click', () => {
+  startResearch();
+});
+
+btnRegenerate.addEventListener('click', () => {
+  researchConfirmPanel.style.display = 'none';
+  researchFormPanel.style.display = '';
+});
+
+btnToggleEdit.addEventListener('click', () => {
+  if (researchEditing) {
+    // Save edits back into the markdown
+    researchMarkdown = researchEdit.value;
+    researchConfirmPreview.textContent = researchMarkdown;
+    researchEdit.style.display = 'none';
+    researchConfirmPreview.style.display = '';
+    btnToggleEdit.textContent = 'Edit';
+    researchEditing = false;
+  } else {
+    researchEdit.value = researchMarkdown;
+    researchConfirmPreview.style.display = 'none';
+    researchEdit.style.display = '';
+    btnToggleEdit.textContent = 'Done';
+    researchEditing = true;
+  }
+});
+
+btnUseResearch.addEventListener('click', () => {
+  // Commit edits if user was editing
+  if (researchEditing) {
+    researchMarkdown = researchEdit.value;
+  }
+  researchFileContent = researchMarkdown;
+  researchConfirmPanel.style.display = 'none';
+  researchFormPanel.style.display = 'none';
+  checkReady();
+});
+
+function startResearch() {
+  // Reset state
+  researchMarkdown = '';
+  researchSearchCount = 0;
+  researchEditing = false;
+  researchPreview.textContent = '';
+  researchConfirmPreview.textContent = '';
+  researchEdit.value = '';
+  researchEdit.style.display = 'none';
+  researchConfirmPreview.style.display = '';
+  btnToggleEdit.textContent = 'Edit';
+  searchLogEl.innerHTML = '';
+  searchLogSummary.textContent = '0 searches';
+  setPhase('search');
+  researchNow.textContent = 'Starting...';
+  showRfError('');
+
+  // Swap panels
+  researchFormPanel.style.display = 'none';
+  researchConfirmPanel.style.display = 'none';
+  researchProgressPanel.style.display = '';
+
+  // Elapsed clock
+  researchStartedAt = Date.now();
+  if (researchElapsedTimer) clearInterval(researchElapsedTimer);
+  researchElapsedTimer = setInterval(updateResearchElapsed, 1000);
+  updateResearchElapsed();
+
+  // Kick off the SSE stream
+  researchAbortController = new AbortController();
+  streamResearch(researchAbortController.signal).catch(err => {
+    if (err.name === 'AbortError') return;
+    console.error('Research stream error:', err);
+    onResearchError(err.message || String(err));
+  });
+}
+
+function updateResearchElapsed() {
+  if (!researchStartedAt) return;
+  const elapsed = Math.floor((Date.now() - researchStartedAt) / 1000);
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  researchElapsed.textContent = `${m}:${s.toString().padStart(2, '0')} elapsed · target 3-4 min`;
+}
+
+function setPhase(phase) {
+  phasePills.forEach(el => {
+    el.classList.toggle('active', el.dataset.phase === phase);
+  });
+}
+
+function appendSearchLog(query) {
+  researchSearchCount++;
+  const li = document.createElement('li');
+  li.textContent = query || '(unnamed search)';
+  searchLogEl.appendChild(li);
+  searchLogSummary.textContent =
+    `${researchSearchCount} action${researchSearchCount === 1 ? '' : 's'}`;
+  // Phase 2 (Reading articles) kicks in the first time we see an open_page
+  // action, or as a heuristic once we've done a handful of searches.
+  if (!researchMarkdown) {
+    if (query && query.startsWith('Reading ')) {
+      setPhase('read');
+    } else if (researchSearchCount >= 5) {
+      setPhase('read');
+    }
+  }
+}
+
+function onResearchDone() {
+  if (researchElapsedTimer) {
+    clearInterval(researchElapsedTimer);
+    researchElapsedTimer = null;
+  }
+  // Final preview state
+  researchConfirmPreview.textContent = researchMarkdown || '(no content returned)';
+  researchEdit.value = researchMarkdown;
+  researchProgressPanel.style.display = 'none';
+  researchConfirmPanel.style.display = '';
+  setPhase('write');
+}
+
+function onResearchError(message) {
+  if (researchElapsedTimer) {
+    clearInterval(researchElapsedTimer);
+    researchElapsedTimer = null;
+  }
+  researchProgressPanel.style.display = 'none';
+  researchFormPanel.style.display = '';
+  showRfError(`Research failed: ${message}. Try again, or use Advanced to upload your own files.`);
+}
+
+async function streamResearch(signal) {
+  const body = {
+    name: rfName.value.trim(),
+    title: rfTitle.value.trim(),
+    company: rfCompany.value.trim(),
+    companyUrl: rfCompanyUrl.value.trim(),
+    linkedinUrl: rfLinkedin.value.trim(),
+  };
+
+  const response = await fetch(`${API_PREFIX}/api/research`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => '');
+    throw new Error(`server returned ${response.status}: ${errText.slice(0, 200)}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let idx;
+    while ((idx = buffer.indexOf('\n\n')) !== -1) {
+      const rawEvent = buffer.slice(0, idx);
+      buffer = buffer.slice(idx + 2);
+      handleSSEEvent(rawEvent);
+    }
+  }
+  // If the stream ended without an explicit 'done' event, finalise anyway.
+  if (researchProgressPanel.style.display !== 'none') {
+    onResearchDone();
+  }
+}
+
+function handleSSEEvent(rawEvent) {
+  let eventName = 'message';
+  const dataLines = [];
+  for (const line of rawEvent.split('\n')) {
+    if (line.startsWith('event:')) {
+      eventName = line.slice(6).trim();
+    } else if (line.startsWith('data:')) {
+      dataLines.push(line.slice(5).trimStart());
+    }
+  }
+  if (dataLines.length === 0) return;
+  let data;
+  try {
+    data = JSON.parse(dataLines.join('\n'));
+  } catch (e) {
+    return;
+  }
+
+  switch (eventName) {
+    case 'search':
+      // A web_search call has started but the query isn't populated yet.
+      // Just signal activity; the next 'search_done' carries the actual query.
+      if (!researchMarkdown) researchNow.textContent = 'Searching the web...';
+      break;
+    case 'search_done':
+      if (data.query) {
+        if (!researchMarkdown) {
+          researchNow.textContent = data.query.startsWith('Reading ')
+            ? data.query
+            : `Searched: ${data.query}`;
+        }
+        appendSearchLog(data.query);
+      }
+      break;
+    case 'delta':
+      if (!researchMarkdown) {
+        // First text - move to Writing phase
+        setPhase('write');
+        researchNow.textContent = 'Writing your research file...';
+      }
+      researchMarkdown += data.text || '';
+      researchPreview.textContent = researchMarkdown;
+      researchPreview.scrollTop = researchPreview.scrollHeight;
+      break;
+    case 'done':
+      onResearchDone();
+      break;
+    case 'error':
+      onResearchError(data.message || 'unknown error');
+      break;
   }
 }
 
@@ -231,9 +517,18 @@ btnStart.addEventListener('click', async () => {
   statusEl.textContent = 'Connecting...';
 
   try {
-    const tokenRes = await fetch('/api/token', { method: 'POST' });
+    const tokenRes = await fetch(`${API_PREFIX}/api/token`, { method: 'POST' });
     if (!tokenRes.ok) throw new Error('Failed to get token');
     const tokenData = await tokenRes.json();
+
+    // If the user didn't upload a skill in Advanced mode, use the baked-in one
+    // returned by the server.
+    if (!skillFileContent) {
+      if (!tokenData.skill) {
+        throw new Error('Server did not return the interview skill prompt');
+      }
+      skillFileContent = tokenData.skill;
+    }
 
     transcript = [];
     aiTurnCount = 0;
@@ -241,6 +536,10 @@ btnStart.addEventListener('click', async () => {
     transcriptEl.innerHTML = '<div class="empty">Listening...</div>';
     infoBox.style.display = 'none';
     progressSection.style.display = '';
+    // Hide research panels during the interview
+    researchFormPanel.style.display = 'none';
+    researchProgressPanel.style.display = 'none';
+    researchConfirmPanel.style.display = 'none';
     resetProgress();
     startTimer();
 
