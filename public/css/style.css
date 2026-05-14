@@ -525,6 +525,62 @@ body {
   }
 }
 
+/* ---- Choice picker ----------------------------------------------------- */
+
+.choice-picker { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.choice-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  background: white;
+  border: 1.5px solid var(--stone);
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--black);
+  transition: all 0.15s;
+}
+
+.choice-tile:hover {
+  border-color: var(--orange);
+  background: var(--orange-10);
+  transform: translateY(-1px);
+}
+
+.choice-tile:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.choice-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.choice-sub {
+  font-size: 0.78rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.back-link {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.75rem;
+  color: #888;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+}
+
+.back-link:hover { color: var(--orange); }
+
 /* ---- Research panel ---------------------------------------------------- */
 
 .research-panel { display: flex; flex-direction: column; gap: 0.75rem; }
@@ -706,29 +762,8 @@ body {
   font-size: 0.78rem;
 }
 
-/* Advanced section */
-.advanced-section { border-top: 1px dashed var(--stone); padding-top: 1rem; }
-
-.advanced-summary {
-  cursor: pointer;
-  font-size: 0.78rem;
-  color: #888;
-  list-style: none;
-  padding: 0.25rem 0;
-}
-
-.advanced-summary::-webkit-details-marker { display: none; }
-.advanced-summary::before { content: '▸ '; color: #bbb; }
-.advanced-section details[open] .advanced-summary::before { content: '▾ '; color: #bbb; }
-
-.advanced-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 0.75rem;
-}
-
-.advanced-body h4 {
+/* Section headings inside research panels (e.g. "Research file") */
+.research-panel h4 {
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;

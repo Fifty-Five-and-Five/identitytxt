@@ -25,9 +25,13 @@ const timerDisplay = document.getElementById('timer-display');
 const timerText = document.getElementById('timer-text');
 
 // Research-panel refs
+const choicePicker = document.getElementById('choice-picker');
+const uploadPanel = document.getElementById('upload-panel');
+const transcriptSection = document.getElementById('transcript-section');
 const researchFormPanel = document.getElementById('research-form-panel');
 const researchProgressPanel = document.getElementById('research-progress-panel');
 const researchConfirmPanel = document.getElementById('research-confirm-panel');
+const btnCopyResearch = document.getElementById('btn-copy-research');
 const rfName = document.getElementById('rf-name');
 const rfTitle = document.getElementById('rf-title');
 const rfCompany = document.getElementById('rf-company');
@@ -80,7 +84,7 @@ const sectionThresholds = [1, 3, 7, 10, 15, 19, 25, 28];
 let lastReminderAtTurn = 0;
 const REMINDER_INTERVAL = 6; // send progress reminder every 6 AI turns
 
-// Advanced-mode skill upload (overrides the baked-in skill from /api/token)
+// Upload-path skill upload (optional - overrides the baked-in skill)
 skillFileInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -90,18 +94,46 @@ skillFileInput.addEventListener('change', async (e) => {
   checkReady();
 });
 
-// Advanced-mode research upload - mark autoMode off and populate the buffer
+// Upload-path research upload (required) - hide picker + upload panel once loaded
 researchFileInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   researchFileContent = await file.text();
   researchUploadEl.classList.add('has-file');
   researchUploadEl.querySelector('.label').innerHTML = `<strong>${file.name}</strong> loaded`;
-  // Hide the research form panels since they're no longer relevant
+  // User has supplied their own file; collapse the setup UI.
+  choicePicker.style.display = 'none';
+  uploadPanel.style.display = 'none';
   researchFormPanel.style.display = 'none';
   researchProgressPanel.style.display = 'none';
   researchConfirmPanel.style.display = 'none';
   checkReady();
+});
+
+// ---- Choice picker -------------------------------------------------------
+
+document.querySelectorAll('.choice-tile').forEach(tile => {
+  tile.addEventListener('click', () => {
+    const choice = tile.dataset.choice;
+    choicePicker.style.display = 'none';
+    if (choice === 'auto') {
+      researchFormPanel.style.display = '';
+      // Focus the first field for momentum
+      setTimeout(() => rfName.focus(), 0);
+    } else if (choice === 'upload') {
+      uploadPanel.style.display = '';
+    }
+  });
+});
+
+document.querySelectorAll('[data-back]').forEach(link => {
+  link.addEventListener('click', () => {
+    researchFormPanel.style.display = 'none';
+    uploadPanel.style.display = 'none';
+    researchProgressPanel.style.display = 'none';
+    researchConfirmPanel.style.display = 'none';
+    choicePicker.style.display = '';
+  });
 });
 
 // Readiness: we only need research to start. The skill comes from /api/token by
@@ -169,9 +201,24 @@ btnUseResearch.addEventListener('click', () => {
     researchMarkdown = researchEdit.value;
   }
   researchFileContent = researchMarkdown;
+  // Collapse the entire setup UI - the user has chosen, time to interview.
+  choicePicker.style.display = 'none';
   researchConfirmPanel.style.display = 'none';
   researchFormPanel.style.display = 'none';
+  uploadPanel.style.display = 'none';
   checkReady();
+});
+
+btnCopyResearch.addEventListener('click', async () => {
+  const text = researchEditing ? researchEdit.value : researchMarkdown;
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    btnCopyResearch.textContent = 'Copied!';
+  } catch (e) {
+    btnCopyResearch.textContent = 'Copy failed';
+  }
+  setTimeout(() => { btnCopyResearch.textContent = 'Copy'; }, 1500);
 });
 
 function startResearch() {
@@ -536,10 +583,14 @@ btnStart.addEventListener('click', async () => {
     transcriptEl.innerHTML = '<div class="empty">Listening...</div>';
     infoBox.style.display = 'none';
     progressSection.style.display = '';
-    // Hide research panels during the interview
+    // Hide all setup UI during the interview
+    choicePicker.style.display = 'none';
     researchFormPanel.style.display = 'none';
     researchProgressPanel.style.display = 'none';
     researchConfirmPanel.style.display = 'none';
+    uploadPanel.style.display = 'none';
+    // Auto-open the transcript - the user wants to see what was said
+    transcriptSection.style.display = 'flex';
     resetProgress();
     startTimer();
 
