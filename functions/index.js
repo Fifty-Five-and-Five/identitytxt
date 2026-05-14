@@ -9,6 +9,9 @@ const db = admin.firestore();
 const { trackHandler } = require('./analytics/tracker.cjs');
 const { dashboardHandler } = require('./analytics/dashboard.cjs');
 
+// --- Research handler (shared with local server.js) ---
+const { handleResearchRequest, INTERVIEW_PROMPT } = require('./research-handler');
+
 const analyticsPassword = defineSecret('ANALYTICS_PASSWORD');
 const openaiApiKey = defineSecret('OPENAI_API_KEY');
 const authorAppPassword = defineSecret('AUTHOR_APP_PASSWORD');
@@ -27,7 +30,12 @@ function parseSessionCookie(req) {
 }
 
 exports.authorApp = onRequest(
-  { secrets: [openaiApiKey, authorAppPassword, authorSessionSecret] },
+  {
+    secrets: [openaiApiKey, authorAppPassword, authorSessionSecret],
+    // Research calls take 3-4 minutes; default 60s is far too short.
+    timeoutSeconds: 600,
+    memory: '512MiB',
+  },
   async (req, res) => {
     const PASSWORD = authorAppPassword.value();
     const SESSION_SECRET = authorSessionSecret.value();
@@ -80,10 +88,28 @@ exports.authorApp = onRequest(
           return res.status(response.status).json({ error: err });
         }
         const data = await response.json();
+        // Bake the interview prompt into the response so the browser doesn't
+        // need a skill-file upload to start the interview.
+        data.skill = INTERVIEW_PROMPT;
         res.json(data);
       } catch (e) {
         console.error('Token fetch error:', e);
         res.status(500).json({ error: e.message });
+      }
+      return;
+    }
+
+    // POST /create/api/research - streaming research via gpt-5-mini + web_search
+    if (route === '/research' && req.method === 'POST') {
+      try {
+        await handleResearchRequest(req, res, OPENAI_KEY);
+      } catch (e) {
+        console.error('Research handler error:', e);
+        if (!res.headersSent) {
+          res.status(500).json({ error: e.message });
+        } else {
+          try { res.end(); } catch (_) {}
+        }
       }
       return;
     }

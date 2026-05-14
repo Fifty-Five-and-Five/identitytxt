@@ -2,6 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
+const { handleResearchRequest, INTERVIEW_PROMPT } = require('./functions/research-handler');
 
 const app = express();
 const PORT = process.env.PORT || 6767;
@@ -62,11 +63,26 @@ app.post('/api/token', requireAuth, async (req, res) => {
       return res.status(response.status).json({ error: err });
     }
     const data = await response.json();
+    // Bake the interview prompt into the response so the browser doesn't need
+    // a skill-file upload to start the interview.
+    data.skill = INTERVIEW_PROMPT;
     res.json(data);
   } catch (e) {
     console.error('Token fetch error:', e);
     res.status(500).json({ error: e.message });
   }
+});
+
+// Streaming research endpoint - runs gpt-5-mini with web_search.
+app.post('/api/research', requireAuth, (req, res) => {
+  handleResearchRequest(req, res, OPENAI_KEY).catch((e) => {
+    console.error('Research handler error:', e);
+    if (!res.headersSent) {
+      res.status(500).json({ error: e.message });
+    } else {
+      try { res.end(); } catch (_) {}
+    }
+  });
 });
 
 // Static files - login page is public

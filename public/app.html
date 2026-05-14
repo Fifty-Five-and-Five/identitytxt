@@ -14,19 +14,79 @@
         <h2>identity.txt</h2>
       </div>
 
-      <div class="sidebar-section">
-        <h3>Skill file</h3>
+      <!-- 1. Choice picker (initial view) ---------------------------------- -->
+      <div class="sidebar-section choice-picker" id="choice-picker">
+        <h3>Choose your path</h3>
+        <button type="button" class="choice-tile" data-choice="auto">
+          <span class="choice-title">Automated research</span>
+          <span class="choice-sub">We search the web and write your research file. 3-4 min.</span>
+        </button>
+        <button type="button" class="choice-tile" data-choice="upload">
+          <span class="choice-title">Upload your docs</span>
+          <span class="choice-sub">Bring your own research file (and optionally a skill file).</span>
+        </button>
+      </div>
+
+      <!-- 2a. Auto: research form ----------------------------------------- -->
+      <div class="sidebar-section research-panel" id="research-form-panel" style="display:none;">
+        <button type="button" class="back-link" data-back="picker">&larr; Choose differently</button>
+        <h3>About you</h3>
+        <p class="research-hint">We'll search the open web for public info about you, then run the interview. Takes 3-4 minutes.</p>
+        <div class="research-form">
+          <label>Full name<input type="text" id="rf-name" autocomplete="name" placeholder="Jane Smith"></label>
+          <label>Job title<input type="text" id="rf-title" placeholder="Head of Marketing"></label>
+          <label>Company<input type="text" id="rf-company" placeholder="Acme Inc"></label>
+          <label>Company URL<input type="url" id="rf-company-url" placeholder="https://acme.com"></label>
+          <label>LinkedIn URL<input type="url" id="rf-linkedin" placeholder="https://linkedin.com/in/..."></label>
+          <button class="btn btn-primary btn-generate" id="btn-generate" disabled>Generate research</button>
+          <div class="research-form-error" id="rf-error" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- 2b. Upload your own --------------------------------------------- -->
+      <div class="sidebar-section research-panel" id="upload-panel" style="display:none;">
+        <button type="button" class="back-link" data-back="picker">&larr; Choose differently</button>
+        <h3>Upload your files</h3>
+        <p class="research-hint">The interview skill is built-in; you only need a research file. Skill upload is an optional override for power users.</p>
+        <h4>Research file (required)</h4>
+        <div class="file-upload" id="research-upload">
+          <input type="file" id="research-file" accept=".md,.txt">
+          <div class="label">Drop <strong>research .md</strong> or click</div>
+        </div>
+        <h4>Skill file (optional)</h4>
         <div class="file-upload" id="skill-upload">
           <input type="file" id="skill-file" accept=".md,.txt">
           <div class="label">Drop <strong>skill .md</strong> or click</div>
         </div>
       </div>
 
-      <div class="sidebar-section">
-        <h3>Research file</h3>
-        <div class="file-upload" id="research-upload">
-          <input type="file" id="research-file" accept=".md,.txt">
-          <div class="label">Drop <strong>research .md</strong> or click</div>
+      <!-- While streaming ------------------------------------------------- -->
+      <div class="sidebar-section research-panel" id="research-progress-panel" style="display:none;">
+        <h3>Researching</h3>
+        <div class="phase-pills" id="phase-pills">
+          <div class="phase-pill active" data-phase="search">1. Researching</div>
+          <div class="phase-pill" data-phase="read">2. Reading articles</div>
+          <div class="phase-pill" data-phase="write">3. Writing</div>
+        </div>
+        <div class="research-now" id="research-now">Starting...</div>
+        <details class="search-log-wrap" id="search-log-wrap">
+          <summary><span id="search-log-summary">0 searches</span></summary>
+          <ul class="search-log" id="search-log"></ul>
+        </details>
+        <div class="research-preview" id="research-preview" aria-live="polite"></div>
+        <div class="research-elapsed" id="research-elapsed">0:00 elapsed &middot; target 3-4 min</div>
+      </div>
+
+      <!-- After streaming completes --------------------------------------- -->
+      <div class="sidebar-section research-panel" id="research-confirm-panel" style="display:none;">
+        <h3>Your research</h3>
+        <div class="research-confirm-preview" id="research-confirm-preview"></div>
+        <textarea class="research-edit" id="research-edit" style="display:none;" spellcheck="false"></textarea>
+        <div class="research-confirm-actions">
+          <button class="btn btn-ghost btn-small" id="btn-toggle-edit">Edit</button>
+          <button class="btn btn-ghost btn-small" id="btn-copy-research">Copy</button>
+          <button class="btn btn-ghost btn-small" id="btn-regenerate">Regenerate</button>
+          <button class="btn btn-primary" id="btn-use-research">Use this</button>
         </div>
       </div>
 
@@ -48,7 +108,7 @@
         </div>
       </div>
 
-      <div class="sidebar-section" style="flex:1; min-height:0; display:flex; flex-direction:column;">
+      <div class="sidebar-section transcript-section" id="transcript-section" style="display:none; flex:1; min-height:0; flex-direction:column;">
         <h3>Transcript</h3>
         <div class="transcript-box" id="transcript">
           <div class="empty">Transcript will appear here during the interview</div>
@@ -59,9 +119,17 @@
     <main class="main-area">
       <div class="info-box" id="info-box">
         <div class="info-box-header">
-          <h3>Before you start</h3>
+          <h3>How this works</h3>
         </div>
         <ul class="info-list">
+          <li>
+            <strong>Step 1: Research (3-4 min).</strong>
+            Fill in your details in the sidebar and hit Generate. The AI searches the open web, reads your published content, and builds a research file. Watch the progress as it works.
+          </li>
+          <li>
+            <strong>Step 2: The interview.</strong>
+            Once research is ready, hit Start interview. Voice conversation, around an hour. The interviewer already knows who you are, so it skips the basics and goes deep on the things only you can answer.
+          </li>
           <li>
             <strong>60-minute time limit.</strong>
             You'll see a countdown once the interview begins. The interviewer will wrap things up automatically as you get close.
@@ -74,12 +142,16 @@
             <strong>Detail makes the difference.</strong>
             The more you share, the better your AI content will be. Stories, examples, and opinions all help.
           </li>
+          <li>
+            <strong>Already have a research file?</strong>
+            Open <em>Advanced</em> at the bottom of the sidebar to upload your own research and skill files instead.
+          </li>
         </ul>
       </div>
       <div class="orb-container">
         <canvas id="orb" width="800" height="800"></canvas>
       </div>
-      <div class="status-label" id="status">Upload a skill file and research file to begin</div>
+      <div class="status-label" id="status">Tell us about yourself in the sidebar to begin</div>
       <div class="controls">
         <button class="btn btn-primary" id="btn-start" disabled>Start interview</button>
         <button class="btn btn-ghost" id="btn-end" style="display:none">End interview</button>

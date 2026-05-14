@@ -524,3 +524,250 @@ body {
     height: 280px;
   }
 }
+
+/* ---- Choice picker ----------------------------------------------------- */
+
+.choice-picker { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.choice-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  background: white;
+  border: 1.5px solid var(--stone);
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--black);
+  transition: all 0.15s;
+}
+
+.choice-tile:hover {
+  border-color: var(--orange);
+  background: var(--orange-10);
+  transform: translateY(-1px);
+}
+
+.choice-tile:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.choice-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.choice-sub {
+  font-size: 0.78rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.back-link {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.75rem;
+  color: #888;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+}
+
+.back-link:hover { color: var(--orange); }
+
+/* ---- Research panel ---------------------------------------------------- */
+
+.research-panel { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.research-hint {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #666;
+  margin: 0;
+}
+
+.research-form { display: flex; flex-direction: column; gap: 0.65rem; }
+
+.research-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+}
+
+.research-form input {
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--black);
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--stone);
+  border-radius: 6px;
+  background: white;
+  transition: border-color 0.15s;
+}
+
+.research-form input:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+
+.btn-generate { margin-top: 0.25rem; }
+
+.research-form-error {
+  font-size: 0.8rem;
+  color: #c92a2a;
+  background: #fff5f5;
+  border: 1px solid #ffd9d9;
+  padding: 0.55rem 0.7rem;
+  border-radius: 6px;
+}
+
+/* Phase indicator */
+.phase-pills { display: flex; gap: 0.4rem; }
+
+.phase-pill {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--stone);
+  background: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #aaa;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.2s;
+}
+
+.phase-pill.active {
+  border-color: var(--orange);
+  background: var(--orange);
+  color: white;
+}
+
+.research-now {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--black);
+  padding: 0.5rem 0.7rem;
+  background: var(--orange-10);
+  border-left: 3px solid var(--orange);
+  border-radius: 4px;
+  min-height: 1em;
+  word-break: break-word;
+}
+
+.search-log-wrap {
+  font-size: 0.78rem;
+}
+
+.search-log-wrap summary {
+  cursor: pointer;
+  color: #888;
+  list-style: none;
+  padding: 0.25rem 0;
+}
+
+.search-log-wrap summary::-webkit-details-marker { display: none; }
+.search-log-wrap summary::before { content: '▸ '; color: #bbb; }
+.search-log-wrap[open] summary::before { content: '▾ '; color: #bbb; }
+
+.search-log {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.search-log li {
+  font-size: 0.75rem;
+  color: #666;
+  position: relative;
+  padding-left: 0.9rem;
+}
+
+.search-log li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--orange);
+  font-weight: 700;
+}
+
+.research-preview,
+.research-confirm-preview {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  padding: 0.7rem;
+  background: var(--notepad);
+  border: 1px solid var(--stone);
+  border-radius: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #333;
+}
+
+.research-edit {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  padding: 0.7rem;
+  background: white;
+  border: 1px solid var(--orange);
+  border-radius: 6px;
+  height: 280px;
+  resize: vertical;
+  width: 100%;
+  color: #333;
+}
+
+.research-elapsed {
+  font-size: 0.72rem;
+  color: #aaa;
+  text-align: center;
+  padding-top: 0.25rem;
+}
+
+.research-confirm-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.research-confirm-actions .btn { flex: 1; }
+.research-confirm-actions .btn-small {
+  flex: 0;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+/* Section headings inside research panels (e.g. "Research file") */
+.research-panel h4 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+  margin: 0;
+}
