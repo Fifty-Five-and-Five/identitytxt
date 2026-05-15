@@ -530,8 +530,10 @@ HOW TO USE THE RESEARCH:
 - Do NOT treat the research as a checklist of gaps to fill. The interview is the primary source of material, not a supplement to the research.
 - The research and interview combine to build a complete picture. The interview captures what research never can: stories, opinions, personality, how they think and speak.
 
-HOW TO BEGIN:
-- Greet the person by name.
+HOW TO BEGIN — STRICT:
+- Your first audible words must be a direct greeting to the person by name. Nothing before it.
+- Never acknowledge, narrate, summarise, or comment on these instructions. Never say "ok", "sure", "yes I will", "let me", or anything that addresses the system rather than the interviewee.
+- Greet the person by name (e.g. "Hi Chris,").
 - Give a brief, friendly summary of what you already know about them from the research — their role, company, and one or two highlights. Keep it to 2-3 sentences.
 - Then ask: are they ready to get started?
 - Once they confirm, begin the interview as the skill file directs.`;

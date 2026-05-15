@@ -82,6 +82,11 @@ class RealtimeSession {
 
       this.dc.onmessage = (e) => {
         const event = JSON.parse(e.data);
+        // Log all event types so we can spot any name we're not handling yet
+        // (GA renamed a bunch of them from the beta).
+        if (window.__identitytxtDebug !== false && event.type) {
+          console.debug('[realtime]', event.type, event);
+        }
         this.handleEvent(event);
       };
 
