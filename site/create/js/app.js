@@ -91,24 +91,35 @@ skillFileInput.addEventListener('change', async (e) => {
   skillFileContent = await file.text();
   skillUploadEl.classList.add('has-file');
   skillUploadEl.querySelector('.label').innerHTML = `<strong>${file.name}</strong> loaded`;
-  checkReady();
+  updateUploadReady();
 });
 
-// Upload-path research upload (required) - hide picker + upload panel once loaded
+// Upload-path research upload (required) - stage the file but don't commit
+// until the user clicks "Use these files".
 researchFileInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   researchFileContent = await file.text();
   researchUploadEl.classList.add('has-file');
   researchUploadEl.querySelector('.label').innerHTML = `<strong>${file.name}</strong> loaded`;
-  // User has supplied their own file; collapse the setup UI.
-  choicePicker.style.display = 'none';
-  uploadPanel.style.display = 'none';
-  researchFormPanel.style.display = 'none';
-  researchProgressPanel.style.display = 'none';
-  researchConfirmPanel.style.display = 'none';
-  checkReady();
+  updateUploadReady();
 });
+
+const btnUseUploaded = document.getElementById('btn-use-uploaded');
+function updateUploadReady() {
+  if (btnUseUploaded) btnUseUploaded.disabled = !researchFileContent;
+}
+if (btnUseUploaded) {
+  btnUseUploaded.addEventListener('click', () => {
+    // Collapse the entire setup UI - user has committed.
+    choicePicker.style.display = 'none';
+    uploadPanel.style.display = 'none';
+    researchFormPanel.style.display = 'none';
+    researchProgressPanel.style.display = 'none';
+    researchConfirmPanel.style.display = 'none';
+    checkReady();
+  });
+}
 
 // ---- Choice picker -------------------------------------------------------
 
@@ -330,6 +341,9 @@ async function streamResearch(signal) {
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Your session expired. Refresh the page and log in again.');
+    }
     const errText = await response.text().catch(() => '');
     throw new Error(`server returned ${response.status}: ${errText.slice(0, 200)}`);
   }
