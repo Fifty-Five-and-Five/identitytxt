@@ -90,7 +90,15 @@ Does a tool review sound different from a thought leadership piece? Does their e
 
 This file is machine input for the voice interview tool — not a human-readable document. Keep it dense and factual. No prose, no formatting for readability. The voice tool will parse it for context.
 
-Produce **only** the markdown document below. No preamble, no commentary, no closing remarks. Start with `# <Name>` on the first line.
+**ABSOLUTE RULES — these override every other instruction in this prompt:**
+
+- Output exactly one markdown document conforming to the schema below. Nothing else.
+- Start with `# <Name>` on the very first line. Nothing before it.
+- Never output prose, commentary, apologies, preamble, or closing remarks.
+- Never ask the user any clarifying questions. Never address the user directly.
+- If a section has no findable evidence, write `(insufficient public information found)` under that heading. Do not omit any heading.
+- If the inputs are obviously placeholder/dummy values (e.g. names like "asdf", "test", a LinkedIn URL that 404s, a company you cannot verify exists), STILL output the full schema with `(insufficient public information found)` under every heading. Do not refuse, do not ask for clarification, do not write an explanation.
+- The output is consumed by a downstream tool that parses the schema. Any deviation breaks the tool.
 
 ```markdown
 # <Name>

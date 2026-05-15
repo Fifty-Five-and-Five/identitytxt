@@ -41,20 +41,17 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-// Mint ephemeral token for OpenAI Realtime API
+// Mint ephemeral token for OpenAI Realtime API (GA — gpt-realtime-2).
 app.post('/api/token', requireAuth, async (req, res) => {
   try {
-    const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
+    const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-realtime-preview',
-        voice: 'sage',
-        modalities: ['audio', 'text'],
-        input_audio_transcription: { model: 'gpt-4o-mini-transcribe', language: 'en' },
+        session: { type: 'realtime', model: 'gpt-realtime-2' },
       }),
     });
     if (!response.ok) {
@@ -63,8 +60,9 @@ app.post('/api/token', requireAuth, async (req, res) => {
       return res.status(response.status).json({ error: err });
     }
     const data = await response.json();
-    // Bake the interview prompt into the response so the browser doesn't need
-    // a skill-file upload to start the interview.
+    if (data.value && !data.client_secret) {
+      data.client_secret = { value: data.value };
+    }
     data.skill = INTERVIEW_PROMPT;
     res.json(data);
   } catch (e) {

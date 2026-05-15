@@ -4,6 +4,13 @@ const orb = new Orb(document.getElementById('orb'));
 // Compute from the current URL so we hit the right endpoints in both environments.
 const API_PREFIX = location.pathname.startsWith('/create/') ? '/create' : '';
 
+// Production streaming bypasses Firebase Hosting via a direct Cloud Run URL,
+// because Hosting cannot stream responses (60s timeout + CDN buffering).
+// These are populated from /api/session on page load; null means local dev,
+// where /api/research is fine same-origin via Express.
+let sessionSecret = null;
+let researchEndpoint = null;
+
 // DOM refs
 const btnStart = document.getElementById('btn-start');
 const btnEnd = document.getElementById('btn-end');
@@ -195,13 +202,13 @@ btnToggleEdit.addEventListener('click', () => {
     researchConfirmPreview.textContent = researchMarkdown;
     researchEdit.style.display = 'none';
     researchConfirmPreview.style.display = '';
-    btnToggleEdit.textContent = 'Edit';
+    btnToggleEdit.textContent = 'Edit research file';
     researchEditing = false;
   } else {
     researchEdit.value = researchMarkdown;
     researchConfirmPreview.style.display = 'none';
     researchEdit.style.display = '';
-    btnToggleEdit.textContent = 'Done';
+    btnToggleEdit.textContent = 'Stop editing';
     researchEditing = true;
   }
 });
@@ -301,13 +308,39 @@ function appendSearchLog(query) {
   }
 }
 
+function looksLikeResearchMarkdown(md) {
+  if (!md || md.length < 300) return false;
+  if (!md.trimStart().startsWith('# ')) return false;
+  // Schema needs at least the Career or Published Content section to be useful.
+  return md.includes('## Career') || md.includes('## Published Content');
+}
+
 function onResearchDone() {
   if (researchElapsedTimer) {
     clearInterval(researchElapsedTimer);
     researchElapsedTimer = null;
   }
+  // If the AI returned prose / a clarifying question instead of the expected
+  // schema, don't pretend it's editable research. Bounce back to the form with
+  // an explanation.
+  if (!looksLikeResearchMarkdown(researchMarkdown)) {
+    researchProgressPanel.style.display = 'none';
+    researchConfirmPanel.style.display = 'none';
+    researchFormPanel.style.display = '';
+    showRfError(
+      "The AI couldn't produce a proper research file from those details. " +
+      "Try a more specific LinkedIn URL or a fuller name and company. " +
+      "Whatever it did return is on the clipboard now if you want to inspect it."
+    );
+    // Stash the malformed output on the clipboard so the user can inspect it
+    // without losing it. Silent failure if clipboard unavailable.
+    if (researchMarkdown && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(researchMarkdown).catch(() => {});
+    }
+    return;
+  }
   // Final preview state
-  researchConfirmPreview.textContent = researchMarkdown || '(no content returned)';
+  researchConfirmPreview.textContent = researchMarkdown;
   researchEdit.value = researchMarkdown;
   researchProgressPanel.style.display = 'none';
   researchConfirmPanel.style.display = '';
@@ -324,6 +357,23 @@ function onResearchError(message) {
   showRfError(`Research failed: ${message}. Try again, or use Advanced to upload your own files.`);
 }
 
+// Pull sessionSecret + researchEndpoint once at startup so the research call
+// has them ready. Silent failure if not authed — startResearch will just retry
+// the same-origin path and the user will see the proper login bounce.
+async function bootstrapSession() {
+  if (!API_PREFIX) return; // local dev — no bootstrap needed
+  try {
+    const r = await fetch(`${API_PREFIX}/api/session`, { method: 'GET' });
+    if (!r.ok) return;
+    const data = await r.json();
+    if (data.sessionSecret) sessionSecret = data.sessionSecret;
+    if (data.researchEndpoint) researchEndpoint = data.researchEndpoint;
+  } catch (_) {
+    // Cookie not set yet, or network blip. Login flow will populate these.
+  }
+}
+bootstrapSession();
+
 async function streamResearch(signal) {
   const body = {
     name: rfName.value.trim(),
@@ -333,9 +383,17 @@ async function streamResearch(signal) {
     linkedinUrl: rfLinkedin.value.trim(),
   };
 
-  const response = await fetch(`${API_PREFIX}/api/research`, {
+  // Production: hit the direct Cloud Run URL with a Bearer token (bypassing
+  // Hosting). Local dev: same-origin /api/research via Express, no Bearer.
+  const url = researchEndpoint || `${API_PREFIX}/api/research`;
+  const headers = { 'Content-Type': 'application/json' };
+  if (researchEndpoint && sessionSecret) {
+    headers['Authorization'] = `Bearer ${sessionSecret}`;
+  }
+
+  const response = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(body),
     signal,
   });
