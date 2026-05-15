@@ -633,7 +633,26 @@ body {
   border: 1px solid #ffd9d9;
   padding: 0.55rem 0.7rem;
   border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
+
+.btn-inline-action {
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--orange);
+  color: white;
+  border: 0;
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-inline-action:hover { filter: brightness(1.05); }
 
 /* Phase indicator */
 .phase-pills { display: flex; gap: 0.4rem; }
