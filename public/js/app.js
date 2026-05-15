@@ -388,10 +388,10 @@ async function bootstrapSession() {
   try {
     const r = await fetch(`${API_PREFIX}/api/session`, { method: 'GET' });
     if (r.status === 401) {
-      showRfError(
-        'Your session has ended. ',
-        reloginAction()
-      );
+      // No valid cookie. There's nothing useful the user can do on this page
+      // without signing in, so bounce them straight to the login page.
+      statusEl.textContent = 'Signing you in...';
+      window.location.href = `${API_PREFIX}/`;
       return;
     }
     if (!r.ok) return;
