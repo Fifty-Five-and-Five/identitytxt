@@ -12,7 +12,6 @@ let sessionSecret = null;
 let researchEndpoint = null;
 
 // DOM refs
-const btnStart = document.getElementById('btn-start');
 const btnEnd = document.getElementById('btn-end');
 const statusEl = document.getElementById('status');
 const transcriptEl = document.getElementById('transcript');
@@ -118,13 +117,13 @@ function updateUploadReady() {
 }
 if (btnUseUploaded) {
   btnUseUploaded.addEventListener('click', () => {
-    // Collapse the entire setup UI - user has committed.
+    // Collapse the setup UI and start the interview.
     choicePicker.style.display = 'none';
     uploadPanel.style.display = 'none';
     researchFormPanel.style.display = 'none';
     researchProgressPanel.style.display = 'none';
     researchConfirmPanel.style.display = 'none';
-    checkReady();
+    startInterview();
   });
 }
 
@@ -154,15 +153,9 @@ document.querySelectorAll('[data-back]').forEach(link => {
   });
 });
 
-// Readiness: we only need research to start. The skill comes from /api/token by
-// default, or from an Advanced upload if the user provided one.
-function checkReady() {
-  const ready = !!researchFileContent;
-  btnStart.disabled = !ready;
-  if (ready) {
-    statusEl.textContent = 'Ready - click Start interview';
-  }
-}
+// Readiness: kept as a no-op shim. The Use buttons now drive everything;
+// nothing else needs to react to researchFileContent being set.
+function checkReady() {}
 
 // ---- Research form -------------------------------------------------------
 
@@ -244,12 +237,12 @@ btnUseResearch.addEventListener('click', () => {
     researchMarkdown = researchEdit.value;
   }
   researchFileContent = researchMarkdown;
-  // Collapse the entire setup UI - the user has chosen, time to interview.
+  // Collapse the setup UI and start the interview.
   choicePicker.style.display = 'none';
   researchConfirmPanel.style.display = 'none';
   researchFormPanel.style.display = 'none';
   uploadPanel.style.display = 'none';
-  checkReady();
+  startInterview();
 });
 
 btnCopyResearch.addEventListener('click', async () => {
@@ -672,8 +665,11 @@ function sendProgressReminder() {
 }
 
 // Start interview
-btnStart.addEventListener('click', async () => {
-  btnStart.disabled = true;
+// Start the interview. Called by btnUseResearch and btnUseUploaded after
+// they've committed the research file. There's no standalone Start button
+// anymore; the Use buttons are the entry point.
+async function startInterview() {
+  if (session) return; // already in flight
   statusEl.textContent = 'Connecting...';
 
   try {
@@ -681,8 +677,8 @@ btnStart.addEventListener('click', async () => {
     if (!tokenRes.ok) throw new Error('Failed to get token');
     const tokenData = await tokenRes.json();
 
-    // If the user didn't upload a skill in Advanced mode, use the baked-in one
-    // returned by the server.
+    // If the user didn't upload a custom skill in the Upload path, use the
+    // baked-in one returned by the server.
     if (!skillFileContent) {
       if (!tokenData.skill) {
         throw new Error('Server did not return the interview skill prompt');
@@ -702,7 +698,7 @@ btnStart.addEventListener('click', async () => {
     researchProgressPanel.style.display = 'none';
     researchConfirmPanel.style.display = 'none';
     uploadPanel.style.display = 'none';
-    // Auto-open the transcript - the user wants to see what was said
+    // Auto-open the transcript so the user can see what was said
     transcriptSection.style.display = 'flex';
     resetProgress();
     startTimer();
@@ -714,8 +710,6 @@ btnStart.addEventListener('click', async () => {
         if (speaker === 'ai') {
           aiTurnCount++;
           updateProgress();
-
-          // Send progress reminder every N AI turns to prevent looping
           if (aiTurnCount - lastReminderAtTurn >= REMINDER_INTERVAL) {
             lastReminderAtTurn = aiTurnCount;
             sendProgressReminder();
@@ -742,17 +736,16 @@ btnStart.addEventListener('click', async () => {
 
     await session.connect(tokenData.client_secret.value, buildSystemPrompt());
 
-    btnStart.style.display = 'none';
     btnEnd.style.display = 'inline-flex';
     statusEl.textContent = 'Connecting to interviewer...';
 
   } catch (err) {
     console.error(err);
-    statusEl.textContent = `Error: ${err.message}`;
-    btnStart.disabled = false;
+    statusEl.textContent = `Error: ${err.message}. Refresh and try again.`;
     stopTimer();
+    session = null;
   }
-});
+}
 
 // End interview (used by button and auto-end)
 function endInterview() {
@@ -773,8 +766,6 @@ function endInterview() {
   statusEl.textContent = 'Interview complete — download your transcript';
 
   btnEnd.style.display = 'none';
-  btnStart.style.display = 'inline-flex';
-  btnStart.disabled = false;
 }
 
 // End interview button
