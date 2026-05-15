@@ -57,8 +57,11 @@ exports.authorApp = onRequest(
     if (route === '/login' && req.method === 'POST') {
       if (req.body?.password === PASSWORD) {
         // Firebase Hosting only forwards the __session cookie
+        // 7-day cookie. The browser will sometimes still drop this depending
+        // on privacy settings; the client-side 401 handler offers a one-click
+        // re-login when it happens.
         res.setHeader('Set-Cookie',
-          `__session=${SESSION_SECRET}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`
+          `__session=${SESSION_SECRET}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`
         );
         // Bootstrap the browser with what it needs to make the streaming
         // research call. researchEndpoint is the direct Cloud Run URL of the
@@ -78,9 +81,19 @@ exports.authorApp = onRequest(
     }
 
     // All other routes require auth via __session cookie
-    if (parseSessionCookie(req) !== SESSION_SECRET) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
+    {
+      const cookieValue = parseSessionCookie(req);
+      if (cookieValue !== SESSION_SECRET) {
+        // Diagnostic breadcrumb so we can tell missing-cookie from
+        // value-mismatch in Cloud Logging next time this happens.
+        const len = cookieValue ? cookieValue.length : 0;
+        const prefix = cookieValue ? cookieValue.slice(0, 8) : '';
+        console.log(
+          `auth fail on ${route}: cookie_len=${len} prefix="${prefix}" expected_len=${SESSION_SECRET.length}`
+        );
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
     }
 
     // GET /create/api/session - lets a refreshed page re-bootstrap without

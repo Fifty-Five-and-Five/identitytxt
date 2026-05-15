@@ -176,14 +176,32 @@ function updateGenerateEnabled() {
   btnGenerate.disabled = !filled;
 }
 
-function showRfError(msg) {
+function showRfError(msg, action) {
   if (!msg) {
     rfError.style.display = 'none';
     rfError.textContent = '';
     return;
   }
   rfError.style.display = '';
-  rfError.textContent = msg;
+  rfError.textContent = '';
+  const span = document.createElement('span');
+  span.textContent = msg;
+  rfError.appendChild(span);
+  if (action) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-inline-action';
+    btn.textContent = action.label;
+    btn.addEventListener('click', action.onClick);
+    rfError.appendChild(btn);
+  }
+}
+
+function reloginAction() {
+  return {
+    label: 'Sign in again',
+    onClick: () => { window.location.href = `${API_PREFIX}/`; },
+  };
 }
 
 btnGenerate.addEventListener('click', () => {
@@ -354,22 +372,34 @@ function onResearchError(message) {
   }
   researchProgressPanel.style.display = 'none';
   researchFormPanel.style.display = '';
+  // Session expired? Offer a one-click re-login instead of a vague error.
+  if (/session expired|401/i.test(message)) {
+    showRfError('Your session has ended. ', reloginAction());
+    return;
+  }
   showRfError(`Research failed: ${message}. Try again, or use Advanced to upload your own files.`);
 }
 
 // Pull sessionSecret + researchEndpoint once at startup so the research call
-// has them ready. Silent failure if not authed — startResearch will just retry
-// the same-origin path and the user will see the proper login bounce.
+// has them ready. On 401 we surface the re-login banner immediately rather
+// than waiting for the user to click Generate and confuse them with a 401.
 async function bootstrapSession() {
   if (!API_PREFIX) return; // local dev — no bootstrap needed
   try {
     const r = await fetch(`${API_PREFIX}/api/session`, { method: 'GET' });
+    if (r.status === 401) {
+      showRfError(
+        'Your session has ended. ',
+        reloginAction()
+      );
+      return;
+    }
     if (!r.ok) return;
     const data = await r.json();
     if (data.sessionSecret) sessionSecret = data.sessionSecret;
     if (data.researchEndpoint) researchEndpoint = data.researchEndpoint;
   } catch (_) {
-    // Cookie not set yet, or network blip. Login flow will populate these.
+    // Network blip — Login flow will populate these.
   }
 }
 bootstrapSession();
