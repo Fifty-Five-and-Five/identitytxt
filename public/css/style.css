@@ -658,6 +658,17 @@ body {
   border-color: var(--orange);
   background: var(--orange);
   color: white;
+  animation: phase-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes phase-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.45); }
+  50%      { box-shadow: 0 0 0 6px rgba(255, 82, 0, 0); }
+}
+
+.search-log-wrap[open] summary {
+  color: var(--black);
+  font-weight: 500;
 }
 
 .research-now {
