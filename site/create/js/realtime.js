@@ -52,18 +52,28 @@ class RealtimeSession {
       // Data channel for events
       this.dc = this.pc.createDataChannel('oai-events');
       this.dc.onopen = () => {
-        // Configure session — must be acknowledged before we ask AI to speak
+        // Configure session - GA Realtime API shape (session.type required,
+        // audio nested under session.audio.input/output).
         this.send({
           type: 'session.update',
           session: {
+            type: 'realtime',
             instructions: systemPrompt,
-            voice: 'coral',
-            input_audio_transcription: { model: 'gpt-realtime-whisper', language: 'en' },
-            turn_detection: {
-              type: 'server_vad',
-              threshold: 0.7,
-              prefix_padding_ms: 500,
-              silence_duration_ms: 800,
+            audio: {
+              input: {
+                transcription: { model: 'gpt-realtime-whisper', language: 'en' },
+                turn_detection: {
+                  type: 'server_vad',
+                  threshold: 0.7,
+                  prefix_padding_ms: 500,
+                  silence_duration_ms: 800,
+                  create_response: true,
+                  interrupt_response: true,
+                },
+              },
+              output: {
+                voice: 'coral',
+              },
             },
           },
         });
