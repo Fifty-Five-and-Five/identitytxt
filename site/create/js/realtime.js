@@ -72,7 +72,7 @@ class RealtimeSession {
                 },
               },
               output: {
-                voice: 'coral',
+                voice: 'ash',
               },
             },
           },
