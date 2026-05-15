@@ -58,7 +58,7 @@ class RealtimeSession {
           session: {
             instructions: systemPrompt,
             voice: 'coral',
-            input_audio_transcription: { model: 'gpt-4o-mini-transcribe', language: 'en' },
+            input_audio_transcription: { model: 'gpt-realtime-whisper', language: 'en' },
             turn_detection: {
               type: 'server_vad',
               threshold: 0.7,
@@ -81,7 +81,7 @@ class RealtimeSession {
 
       // Send to OpenAI
       const sdpResponse = await fetch(
-        `https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview`,
+        `https://api.openai.com/v1/realtime?model=gpt-realtime-2`,
         {
           method: 'POST',
           headers: {

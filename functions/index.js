@@ -22,6 +22,13 @@ exports.analyticsApi = onRequest({ secrets: [analyticsPassword] }, dashboardHand
 
 // --- identity.txt voice interview tool (password-protected) ---
 
+// Direct Cloud Run URL of the researchStream function below. Firebase Hosting
+// cannot stream responses (it buffers + has a 60s timeout), so the browser hits
+// this URL directly with a Bearer token, bypassing Hosting entirely.
+const RESEARCH_STREAM_URL = 'https://us-central1-identitytxt.cloudfunctions.net/researchStream';
+
+const ALLOWED_RESEARCH_ORIGIN = 'https://identitytxt.org';
+
 // Parse __session cookie (the only cookie Firebase Hosting forwards)
 function parseSessionCookie(req) {
   const header = req.headers.cookie || '';
@@ -53,7 +60,17 @@ exports.authorApp = onRequest(
         res.setHeader('Set-Cookie',
           `__session=${SESSION_SECRET}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`
         );
-        res.json({ ok: true });
+        // Bootstrap the browser with what it needs to make the streaming
+        // research call. researchEndpoint is the direct Cloud Run URL of the
+        // researchStream function — we bypass Hosting for streaming because
+        // its CDN buffers responses and has a 60s timeout. sessionSecret is
+        // the Bearer token for that cross-origin call (same shared secret
+        // as the __session cookie, different transport).
+        res.json({
+          ok: true,
+          sessionSecret: SESSION_SECRET,
+          researchEndpoint: RESEARCH_STREAM_URL,
+        });
       } else {
         res.status(401).json({ error: 'Wrong password' });
       }
@@ -66,20 +83,30 @@ exports.authorApp = onRequest(
       return;
     }
 
+    // GET /create/api/session - lets a refreshed page re-bootstrap without
+    // having to re-login (cookie still valid).
+    if (route === '/session' && req.method === 'GET') {
+      res.json({
+        sessionSecret: SESSION_SECRET,
+        researchEndpoint: RESEARCH_STREAM_URL,
+      });
+      return;
+    }
+
     // POST /create/api/token
+    // Mints an ephemeral client_secret for the GA Realtime API (gpt-realtime-2).
+    // Voice, transcription model, and instructions are sent later via session.update
+    // over the WebRTC data channel (see public/js/realtime.js).
     if (route === '/token' && req.method === 'POST') {
       try {
-        const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
+        const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${OPENAI_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'gpt-4o-realtime-preview',
-            voice: 'sage',
-            modalities: ['audio', 'text'],
-            input_audio_transcription: { model: 'gpt-4o-mini-transcribe', language: 'en' },
+            session: { type: 'realtime', model: 'gpt-realtime-2' },
           }),
         });
         if (!response.ok) {
@@ -88,6 +115,11 @@ exports.authorApp = onRequest(
           return res.status(response.status).json({ error: err });
         }
         const data = await response.json();
+        // GA returns { value: "ek_..." } at the top level; older clients expect
+        // client_secret.value. Normalise so the frontend doesn't need to change.
+        if (data.value && !data.client_secret) {
+          data.client_secret = { value: data.value };
+        }
         // Bake the interview prompt into the response so the browser doesn't
         // need a skill-file upload to start the interview.
         data.skill = INTERVIEW_PROMPT;
@@ -99,22 +131,69 @@ exports.authorApp = onRequest(
       return;
     }
 
-    // POST /create/api/research - streaming research via gpt-5-mini + web_search
-    if (route === '/research' && req.method === 'POST') {
-      try {
-        await handleResearchRequest(req, res, OPENAI_KEY);
-      } catch (e) {
-        console.error('Research handler error:', e);
-        if (!res.headersSent) {
-          res.status(500).json({ error: e.message });
-        } else {
-          try { res.end(); } catch (_) {}
-        }
-      }
+    // /research used to live here but moved to the researchStream function
+    // (below) because Firebase Hosting cannot stream responses through to
+    // Cloud Functions. Tell anyone still hitting this route where to go.
+    if (route === '/research') {
+      res.status(410).json({
+        error: 'Moved. Call /api/session to discover the direct streaming URL.',
+      });
       return;
     }
 
     res.status(404).json({ error: 'Not found' });
+  }
+);
+
+// --- researchStream: direct-to-Cloud-Run streaming function -----------------
+//
+// This is invoked from the browser directly (cross-origin), bypassing Firebase
+// Hosting. Auth via Authorization: Bearer <SESSION_SECRET> instead of cookies
+// (HttpOnly cookies don't travel cross-origin).
+exports.researchStream = onRequest(
+  {
+    secrets: [openaiApiKey, authorSessionSecret],
+    timeoutSeconds: 600,
+    memory: '512MiB',
+    cors: false, // we handle CORS manually below — Firebase's CORS wrapper buffers responses
+  },
+  async (req, res) => {
+    // CORS — strictly identitytxt.org. No credentials (we use Bearer auth, not cookies).
+    res.setHeader('Access-Control-Allow-Origin', ALLOWED_RESEARCH_ORIGIN);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Max-Age', '3600');
+
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+    if (req.method !== 'POST') {
+      res.status(405).json({ error: 'Method not allowed' });
+      return;
+    }
+
+    // Bearer auth — match the SESSION_SECRET used by the cookie flow.
+    const SESSION_SECRET = authorSessionSecret.value();
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+    if (!token || token !== SESSION_SECRET) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const OPENAI_KEY = openaiApiKey.value();
+    try {
+      await handleResearchRequest(req, res, OPENAI_KEY);
+    } catch (e) {
+      console.error('researchStream handler error:', e);
+      if (!res.headersSent) {
+        res.status(500).json({ error: e.message });
+      } else {
+        try { res.end(); } catch (_) {}
+      }
+    }
   }
 );
 
