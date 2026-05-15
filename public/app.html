@@ -65,18 +65,16 @@
       <!-- While streaming ------------------------------------------------- -->
       <div class="sidebar-section research-panel" id="research-progress-panel" style="display:none;">
         <h3>Researching</h3>
-        <div class="phase-pills" id="phase-pills">
-          <div class="phase-pill active" data-phase="search">1. Researching</div>
-          <div class="phase-pill" data-phase="read">2. Reading articles</div>
-          <div class="phase-pill" data-phase="write">3. Writing</div>
-        </div>
         <div class="research-now" id="research-now">Starting...</div>
         <details class="search-log-wrap" id="search-log-wrap" open>
           <summary><span id="search-log-summary">0 actions so far</span></summary>
           <ul class="search-log" id="search-log"></ul>
         </details>
         <div class="research-preview" id="research-preview" aria-live="polite"></div>
-        <div class="research-elapsed" id="research-elapsed">0:00 elapsed &middot; target 3-4 min</div>
+        <div class="research-elapsed-row">
+          <span class="research-spinner" aria-hidden="true"></span>
+          <span class="research-elapsed" id="research-elapsed">0:00 elapsed &middot; target 3-4 min</span>
+        </div>
       </div>
 
       <!-- After streaming completes --------------------------------------- -->
