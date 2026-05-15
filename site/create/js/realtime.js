@@ -129,13 +129,16 @@ class RealtimeSession {
         }
         break;
 
+      // Beta name was response.audio_transcript.done; GA renamed it.
       case 'response.audio_transcript.done':
+      case 'response.output_audio_transcript.done':
         if (event.transcript?.trim()) {
           this.onTranscript('ai', event.transcript.trim());
         }
         break;
 
       case 'response.audio.done':
+      case 'response.output_audio.done':
         this.onStateChange('listening');
         break;
 
