@@ -79,9 +79,10 @@ class RealtimeSession {
       const offer = await this.pc.createOffer();
       await this.pc.setLocalDescription(offer);
 
-      // Send to OpenAI
+      // Send to OpenAI - GA endpoint is /v1/realtime/calls. The model is
+      // encoded in the client_secret (ek_...) so no query param needed.
       const sdpResponse = await fetch(
-        `https://api.openai.com/v1/realtime?model=gpt-realtime-2`,
+        `https://api.openai.com/v1/realtime/calls`,
         {
           method: 'POST',
           headers: {
