@@ -78,18 +78,23 @@ async function handleResearchRequest(req, res, openaiKey) {
     return;
   }
 
-  // SSE headers. The combination below is what's needed to defeat both
-  // Firebase Hosting's CDN buffering and any gzip middleware between us and
-  // the client.
+  // SSE headers. Combination below disables Hosting CDN caching.
   res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
   res.setHeader('Cache-Control', 'private, no-cache, no-store, no-transform, must-revalidate, max-age=0');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
-  res.setHeader('Content-Encoding', 'identity');
   res.flushHeaders?.();
-  // Send a heartbeat comment immediately so any intermediate proxy commits
-  // to streaming this response rather than buffering it.
-  res.write(': stream-open\n\n');
+  // Cloud Run buffers small responses (~1 KB) before flushing. Send a 4 KB
+  // padded comment immediately so the buffer flushes and the client sees the
+  // stream is open within milliseconds.
+  res.write(': ' + ' '.repeat(4096) + '\n\n');
+
+  // Keepalive ticks - prevents 60s idle timeouts on the Hosting proxy and
+  // keeps the Cloud Run output pipe flowing during long reasoning phases.
+  const keepalive = setInterval(() => {
+    try { res.write(': ka\n\n'); } catch (_) {}
+  }, 5000);
+  res.on('close', () => clearInterval(keepalive));
 
   const userMessage = `Research this person and produce the research markdown in the exact schema specified in the instructions.
 
@@ -208,6 +213,7 @@ Follow every step in the instructions including the deep content analysis. Fetch
   if (!endedNormally) {
     sseWrite(res, 'done', {});
   }
+  clearInterval(keepalive);
   res.end();
 }
 
