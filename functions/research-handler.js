@@ -78,12 +78,18 @@ async function handleResearchRequest(req, res, openaiKey) {
     return;
   }
 
-  // SSE headers
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  // SSE headers. The combination below is what's needed to defeat both
+  // Firebase Hosting's CDN buffering and any gzip middleware between us and
+  // the client.
+  res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+  res.setHeader('Cache-Control', 'private, no-cache, no-store, no-transform, must-revalidate, max-age=0');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
+  res.setHeader('Content-Encoding', 'identity');
   res.flushHeaders?.();
+  // Send a heartbeat comment immediately so any intermediate proxy commits
+  // to streaming this response rather than buffering it.
+  res.write(': stream-open\n\n');
 
   const userMessage = `Research this person and produce the research markdown in the exact schema specified in the instructions.
 

@@ -47,7 +47,7 @@
       <div class="sidebar-section research-panel" id="upload-panel" style="display:none;">
         <button type="button" class="back-link" data-back="picker">&larr; Choose differently</button>
         <h3>Upload your files</h3>
-        <p class="research-hint">The interview skill is built-in; you only need a research file. Skill upload is an optional override for power users.</p>
+        <p class="research-hint">Drop the research file you've already generated. The interview skill is built-in; only upload a custom one if you want to override it.</p>
         <h4>Research file (required)</h4>
         <div class="file-upload" id="research-upload">
           <input type="file" id="research-file" accept=".md,.txt">
@@ -58,6 +58,7 @@
           <input type="file" id="skill-file" accept=".md,.txt">
           <div class="label">Drop <strong>skill .md</strong> or click</div>
         </div>
+        <button class="btn btn-primary" id="btn-use-uploaded" disabled>Use these files</button>
       </div>
 
       <!-- While streaming ------------------------------------------------- -->
@@ -144,7 +145,7 @@
           </li>
           <li>
             <strong>Already have a research file?</strong>
-            Open <em>Advanced</em> at the bottom of the sidebar to upload your own research and skill files instead.
+            Pick <em>Upload your docs</em> in the sidebar instead of running the auto-research.
           </li>
         </ul>
       </div>
