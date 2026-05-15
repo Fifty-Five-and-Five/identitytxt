@@ -2,6 +2,13 @@
   "hosting": {
     "public": "site",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "redirects": [
+      {
+        "source": "/favicon.ico",
+        "destination": "/favicon.svg",
+        "type": 301
+      }
+    ],
     "rewrites": [
       {
         "source": "/api/t",

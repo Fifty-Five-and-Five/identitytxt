@@ -169,6 +169,13 @@ function checkReady() {
 const researchFormInputs = [rfName, rfTitle, rfCompany, rfCompanyUrl, rfLinkedin];
 researchFormInputs.forEach(input => {
   input.addEventListener('input', updateGenerateEnabled);
+  // Enter on any field triggers Generate, as long as it's enabled.
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !btnGenerate.disabled) {
+      e.preventDefault();
+      btnGenerate.click();
+    }
+  });
 });
 
 function updateGenerateEnabled() {
