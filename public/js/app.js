@@ -320,6 +320,7 @@ function appendSearchLog(query) {
   const li = document.createElement('li');
   li.textContent = query || '(unnamed search)';
   searchLogEl.appendChild(li);
+  searchLogEl.scrollTop = searchLogEl.scrollHeight;
   searchLogSummary.textContent =
     `${researchSearchCount} action${researchSearchCount === 1 ? '' : 's'} so far`;
   // Phase 2 (Reading articles) kicks in the first time we see an open_page
