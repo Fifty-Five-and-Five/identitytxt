@@ -251,7 +251,7 @@ function startResearch() {
   researchConfirmPreview.style.display = '';
   btnToggleEdit.textContent = 'Edit';
   searchLogEl.innerHTML = '';
-  searchLogSummary.textContent = '0 searches';
+  searchLogSummary.textContent = '0 actions so far';
   setPhase('search');
   researchNow.textContent = 'Starting...';
   showRfError('');
@@ -296,7 +296,7 @@ function appendSearchLog(query) {
   li.textContent = query || '(unnamed search)';
   searchLogEl.appendChild(li);
   searchLogSummary.textContent =
-    `${researchSearchCount} action${researchSearchCount === 1 ? '' : 's'}`;
+    `${researchSearchCount} action${researchSearchCount === 1 ? '' : 's'} so far`;
   // Phase 2 (Reading articles) kicks in the first time we see an open_page
   // action, or as a heuristic once we've done a handful of searches.
   if (!researchMarkdown) {
