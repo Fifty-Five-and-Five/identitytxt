@@ -518,7 +518,6 @@ function buildSystemPrompt() {
 
 LANGUAGE (MANDATORY):
 - You MUST speak English at all times. Every word you say must be in English. No exceptions.
-- Speak with a clear British English accent throughout the conversation. Use British pronunciation (e.g. "schedule" with a "sh", "z" pronounced "zed"), British vocabulary where natural ("colleague", "right then", "lovely"), and a measured, professional UK cadence. Do not slip into American pronunciation.
 - Even if the interviewee speaks in another language, you must always reply in English.
 - Never switch languages, never translate, never repeat what was said in another language. English only.
 
