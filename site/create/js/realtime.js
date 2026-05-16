@@ -64,9 +64,9 @@ class RealtimeSession {
                 transcription: { model: 'gpt-realtime-whisper', language: 'en' },
                 turn_detection: {
                   type: 'server_vad',
-                  threshold: 0.7,
+                  threshold: 0.9,
                   prefix_padding_ms: 500,
-                  silence_duration_ms: 800,
+                  silence_duration_ms: 1500,
                   create_response: true,
                   interrupt_response: true,
                 },
